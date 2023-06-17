@@ -7,6 +7,8 @@
   - (2023/06/17)VSCodeとWSL2との連携方法を知る
     - 参考資料:[Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/about)
   - GitとWSL2の連帯方法を知る(<---Now:2023/06/17)
+    - Program専用DriveをWindows側、WSL2側で共有してgitコマンドで管理する。
+    - WSL2側のgitを削除し、WSL側のターミナルからはWindows側のgit(git.exe)を実行することで、同じアカウントでWindows、WSLともに利用できる
   - NASMのインストール
   - VimでESCを入力した時のIME制御プログラムのバグを修正
 - アセンブラの使い方を学ぶ
