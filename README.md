@@ -19,11 +19,11 @@
 - アセンブリ言語の勉強
   - 「書籍1:13:アセンブラによる制御構文と関数の記述例」
 - Cコンパイラ作成
-  - ステップ1:整数1個をコンパイルする言語の作成
+  - - [ ] 1:整数1個をコンパイルする言語の作成
     - 入力
     - 出力
     - libcの呼び出し 
-  - ステップ2:加減算の実現
+  - - [ ] 2:加減算の実現
 
 <!-- ## Cコンパイラの作成手順 -->
 <!-- 2. 実行できるだけのプログラムをアセンブリ言語で作成する(スタートアップルーチンなどの処理)
@@ -74,3 +74,59 @@
   - [ ] 25:モード移行を実現する
   - [ ] 26:ファイルの読み出しを実現する
   - [ ] 27:PCの電源を切る
+
+### compilerbook:[低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook)
+- [ ] 1：整数1個をコンパイルする言語の作成
+- [ ] 2：加減算のできるコンパイラの作成
+- [ ] 3：トークナイザを導入
+- [ ] 4：エラーメッセージを改良
+- [ ] 5：四則演算のできる言語の作成
+- [ ] 6：単項プラスと単項マイナス
+- [ ] 7: 比較演算子
+- [ ] 8: ファイル分割とMakefileの変更
+- [ ] 9：1文字のローカル変数
+- [ ] 10：複数文字のローカル変数
+- [ ] 11：return文
+- [ ] 12: 制御構文を足す
+- [ ] 13: ブロック
+- [ ] 14: 関数の呼び出しに対応する
+- [ ] 15: 関数の定義に対応する
+- [ ] 16: 単項&と単項*
+- [ ] 17: 暗黙の変数定義を廃止して、intというキーワードを導入する
+- [ ] 18: ポインタ型を導入する
+- [ ] 19: ポインタの加算と減算を実装する
+- [ ] 20: sizeof演算子
+- [ ] 21: 配列を実装する
+- [ ] 22: 配列の添字を実装する
+- [ ] 23: グローバル変数を実装する
+- [ ] 24: 文字型を実装する
+- [ ] 25: 文字列リテラルを実装する
+- [ ] 26: 入力をファイルから読む
+- [ ] 27: 行コメントとブロックコメント
+- [ ] 28: テストをCで書き直す
+- [ ] 29以降: [要加筆]
+
+
+### NASM_Tutorial:[NASM Assembly Tutorial](https://www.tutorialspoint.com/assembly_programming/assembly_quick_guide.htm)
+- [ ] Home
+- [ ] Introduction
+- [ ] Environment Setup
+- [ ] Basic Syntax
+- [ ] Memory Segments
+- [ ] Registers
+- [ ] System Calls
+- [ ] Addressing Modes
+- [ ] Variables
+- [ ] Constants
+- [ ] Arithmetic Instructions
+- [ ] Logical Instructions
+- [ ] Conditions
+- [ ] Loops
+- [ ] Numbers
+- [ ] Strings
+- [ ] Arrays
+- [ ] Procedures
+- [ ] Recursion
+- [ ] Macros
+- [ ] File Management
+- [ ] Memory Management
