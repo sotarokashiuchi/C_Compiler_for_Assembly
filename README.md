@@ -6,10 +6,12 @@
   - (2023/06/17):WSL2のインストール
   - (2023/06/17)VSCodeとWSL2との連携方法を知る
     - 参考資料:[Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/about)
-  - GitとWSL2の連帯方法を知る(<---Now:2023/06/17)
-    - Program専用DriveをWindows側、WSL2側で共有してgitコマンドで管理する。
-    - WSL2側のgitを削除し、WSL側のターミナルからはWindows側のgit(git.exe)を実行することで、同じアカウントでWindows、WSLともに利用できる
-  - NASMのインストール
+  - (2023/06/17)GitとWSL2の連帯方法を知る
+    - GitHubにバックアップを取っているため、別Driveに分ける必要がない。
+    - ~~Program専用DriveをWindows側、WSL2側で共有してgitコマンドで管理する。~~
+    - ~~WSL2側のgitを削除し、WSL側のターミナルからはWindows側のgit(git.exe)を実行することで、同じアカウントでWindows、WSLともに利用できる~~
+    - ~~問題点:VSCodeのGitのサポートを受けれない(Editerの行番号に変更箇所の色が付かないなど)(保留)~~
+  - NASMのインストール(<---Now:2023/06/17)
   - VimでESCを入力した時のIME制御プログラムのバグを修正
 - アセンブラの使い方を学ぶ
   - 「書籍1:09:アセンブラ(NASM)の使い方」
