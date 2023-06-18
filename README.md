@@ -2,29 +2,40 @@
 - アセンブリ言語でCコンパイラを作成すること
 
 ## 計画
-- 環境の構築
-  - (2023/06/17):WSL2のインストール
-  - (2023/06/17)VSCodeとWSL2との連携方法を知る
+- [x] (2023/06/18)環境の構築
+  - [x] (2023/06/17):WSL2のインストール
+  - [x] (2023/06/17)VSCodeとWSL2との連携方法を知る
     - 参考資料:[Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/about)
-  - (2023/06/17)GitとWSL2の連帯方法を知る
+  - [x] (2023/06/17)GitとWSL2の連帯方法を知る
     - GitHubにバックアップを取っているため、別Driveに分ける必要がない。
     - ~~Program専用DriveをWindows側、WSL2側で共有してgitコマンドで管理する。~~
     - ~~WSL2側のgitを削除し、WSL側のターミナルからはWindows側のgit(git.exe)を実行することで、同じアカウントでWindows、WSLともに利用できる~~
     - ~~問題点:VSCodeのGitのサポートを受けれない(Editerの行番号に変更箇所の色が付かないなど)(保留)~~
-  - (2023/06/17)Discordの音声が認識されない不具合を修正
-  - NASMのインストール(<---Now:2023/06/17)
-  - VimでESCを入力した時のIME制御プログラムのバグを修正
-- アセンブラの使い方を学ぶ
-  - 「書籍1:09:アセンブラ(NASM)の使い方」
-  - 「書籍1:12:開発環境を構築する」
-- アセンブリ言語の勉強
-  - 「書籍1:13:アセンブラによる制御構文と関数の記述例」
-- Cコンパイラ作成
-  - - [ ] 1:整数1個をコンパイルする言語の作成
+  - [x] (2023/06/17)Discordの音声が認識されない不具合を修正
+  - [x] (2023/06/18)NASMのインストール
+    - 「NASM_Tutorial:03:Environment Setup」
+  - [ ] (保留)VimでESCを入力した時のIME制御プログラムのバグを修正
+    - 原因不明の為保留する
+- [x] (2023/06/18)アセンブラの使い方を学ぶ
+  - [x] (2023/06/18)「書籍1:09:アセンブラ(NASM)の使い方」
+  - [x] (2023/06/18)「書籍1:12:開発環境を構築する」
+- [x] (2023/06/18)実行可能ファイルの作り方を学ぶ
+  - [x] (2023/06/18)nasmのオプションを知る
+  - [x] (2023/06/18)ldのオプションを知る
+  - [x] (2023/06/18)「NASM_Tutorial:04:Basic Syntax」
+- [ ] アセンブリ言語の基本を知る
+  - [x] (2023/06/18)「書籍1:06:コンピュータの基本構成」
+  - [ ] 「書籍1:07:CPUの基本機能」(<---Now:2023/06/18)
+  - [ ] 「書籍1:08:CPU命令の使い方」
+  - [x] (2023/06/18)「書籍1:09:アセンブラ(NASM)の使い方」
+  - [ ] 「書籍1:10:周辺機器の制御方法」
+  - [ ] 「書籍1:13:アセンブラによる制御構文と関数の記述例」
+- [ ] Cコンパイラ作成
+  - [ ] 1:整数1個をコンパイルする言語の作成
     - 入力
     - 出力
     - libcの呼び出し 
-  - - [ ] 2:加減算の実現
+  - [ ] 2:加減算の実現
 
 <!-- ## Cコンパイラの作成手順 -->
 <!-- 2. 実行できるだけのプログラムをアセンブリ言語で作成する(スタートアップルーチンなどの処理)
@@ -52,14 +63,14 @@
   - [ ] 04:ファイルシステムのしくみ
   - [ ] 05:入出力のしくみ
 - [ ] x86系PCのアーキテクチャを理解する
-  - [ ] 06:コンピュータの基本構成
+  - [x] 06:コンピュータの基本構成
   - [ ] 07:CPUの基本機能
   - [ ] 08:CPU命令の使い方
-  - [ ] 09:アセンブラ(NASM)の使い方
+  - [x] 09:アセンブラ(NASM)の使い方
   - [ ] 10:周辺機器の制御方法
   - [ ] 11:BIOSの役割
 - [ ] OSを実装する
-  - [ ] 12:開発環境を構築する
+  - [x] 12:開発環境を構築する
   - [ ] 13:アセンブラによる制御構文と関数の記述例
   - [ ] 14:リアルモードでの基本動作を実装
   - [ ] 15:プロテクトモードへの移行を実現
@@ -109,25 +120,25 @@
 
 
 ### NASM_Tutorial:[NASM Assembly Tutorial](https://www.tutorialspoint.com/assembly_programming/assembly_quick_guide.htm)
-- [ ] Home
-- [ ] Introduction
-- [ ] Environment Setup
-- [ ] Basic Syntax
-- [ ] Memory Segments
-- [ ] Registers
-- [ ] System Calls
-- [ ] Addressing Modes
-- [ ] Variables
-- [ ] Constants
-- [ ] Arithmetic Instructions
-- [ ] Logical Instructions
-- [ ] Conditions
-- [ ] Loops
-- [ ] Numbers
-- [ ] Strings
-- [ ] Arrays
-- [ ] Procedures
-- [ ] Recursion
-- [ ] Macros
-- [ ] File Management
-- [ ] Memory Management
+- [ ] 01:Home
+- [ ] 02:Introduction
+- [x] 03:Environment Setup
+- [x] 04:Basic Syntax
+- [ ] 05:Memory Segments
+- [ ] 06:Registers
+- [ ] 07:System Calls
+- [ ] 08:Addressing Modes
+- [ ] 09:Variables
+- [ ] 10:Constants
+- [ ] 11:Arithmetic Instructions
+- [ ] 12:Logical Instructions
+- [ ] 13:Conditions
+- [ ] 14:Loops
+- [ ] 15:Numbers
+- [ ] 16:Strings
+- [ ] 17:Arrays
+- [ ] 18:Procedures
+- [ ] 19Recursion
+- [ ] 20:Macros
+- [ ] 21:File Management
+- [ ] 22:Memory Management
