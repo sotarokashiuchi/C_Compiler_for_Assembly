@@ -8,6 +8,9 @@
     - 参考資料:[Microsoft](https://learn.microsoft.com/ja-jp/windows/wsl/about)
   - [x] (2023/06/17)GitとWSL2の連帯方法を知る
     - GitHubにバックアップを取っているため、別Driveに分ける必要がない。
+    - GitをWindows、WSLともにインストールし、GitHubアカウントを共有することができる
+      - [WSLでGitの使用を開始する](https://learn.microsoft.com/ja-jp/windows/wsl/tutorials/wsl-git)
+      - Git Credential Manager(GCM)のpathがホストのGitのバージョンによって異なるので注意
     - ~~Program専用DriveをWindows側、WSL2側で共有してgitコマンドで管理する。~~
     - ~~WSL2側のgitを削除し、WSL側のターミナルからはWindows側のgit(git.exe)を実行することで、同じアカウントでWindows、WSLともに利用できる~~
     - ~~問題点:VSCodeのGitのサポートを受けれない(Editerの行番号に変更箇所の色が付かないなど)(保留)~~
