@@ -28,14 +28,19 @@ _start:
   mov	rsi,msg4
   print
 
-  ; 4行目
+  ; 5行目
   mov	rdx,len5
   mov	rsi,msg5
   print
 
+  ; 6行目
+  mov	rdx,len6
+  mov	rsi,msg6
+  print
+
   ; exit呼び出し
-  mov     rax, 60
-  mov     rdi, 0
+  mov rax, 60 ;exit syscall 識別子
+  mov rdi, 3  ;引数1:終了ステータス
   syscall
 
 [SECTION .data]
@@ -45,9 +50,9 @@ msg2 db '  global _start', 0xa
 len2 equ $ - msg2
 msg3 db '_start:', 0xa
 len3 equ $ - msg3
-msg4 db '        mov ebx, 0D42', 0xa
+msg4 db '        mov rax, 60', 0xa ;exit syscall 識別子
 len4 equ $ - msg4
-msg5 db '        mov eax, 1', 0xa
+msg5 db '        mov rdi, 0D42', 0xa  ;引数1:終了ステータス
 len5 equ $ - msg5
-msg6 db '        int 0x80', 0xa ;exit呼び出し
+msg6 db '        syscall', 0xa ;exit呼び出し
 len6 equ $ - msg6
