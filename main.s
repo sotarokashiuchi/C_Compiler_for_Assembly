@@ -63,10 +63,11 @@ main:
   mov	rsi,msg8
   print
 
-  mov   rsi, [rbp-16]; *buf
-  mov   rdx, rcx    ; count
-  print
-  syscall
+  ; 数値と文字列を変換する必要がある
+  ; mov   rsi, [rbp-16]; *buf
+  ; mov   rdx, rcx    ; count
+  ; print
+  ; syscall
 
   mov	rdx,len9
   mov	rsi,msg9
@@ -102,49 +103,3 @@ len8 equ $ - msg8
 msg9 db 0xa, 0x09, 'syscall', 0xa ;exit呼び出し
 len9 equ $ - msg9
 
-
-; [SECTION .text]
-;   global main
-; main:
-;   push  rbp
-;   mov   rbp, rsp
-;   mov   rax, rdi    ; 第一引数(argc)
-;   mov   rbx, rsi    ; 第二引数(argv[0])
-;   add   rbx, 0x8    ; 第二引数(argv[1])
-;   mov   rax, 60
-;   mov   rdi, 0D42
-;   syscall
-;   mov   rsp, rbp
-;   pop   rbp
-
-; [SECTION .text]
-;   global main
-; main:
-;   push  rbp
-;   mov   rbp, rsp
-;   ; sub   rsp, 0x10
-
-;   mov   rax, rdi    ; 第一引数(argc)
-;   mov   rbx, rsi    ; 第二引数(argv[0])
-;   add   rbx, 0x8    ; 第二引数(argv[1])
-;   push  qword [rbx]
-
-;   mov   rcx, 0x0
-;   mov   rax, qword [rbp-8]
-
-; .loop:
-;   cmp   byte [rax], 0x0
-;   je    .done
-;   inc   rax
-;   inc   rcx         ; インクリメント
-;   jmp   .loop
-
-; .done:
-;   mov   rax, 0x1
-;   mov   rdi, 0x1    ; fd
-;   mov   rsi, [rbp-8]; *buf
-;   mov   rdx, rcx    ; count
-;   syscall           ; write(fd, *buf, count)
-
-;   mov   rsp, rbp
-;   pop   rbp
