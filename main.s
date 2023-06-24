@@ -46,9 +46,9 @@ _start:
 [SECTION .data]
 msg1 db '[SECTION .text]', 0xa  ; 「0xa」は\n
 len1 equ $ - msg1
-msg2 db '  global _start', 0xa
+msg2 db '  global main', 0xa
 len2 equ $ - msg2
-msg3 db '_start:', 0xa
+msg3 db 'main:', 0xa
 len3 equ $ - msg3
 msg4 db '        mov rax, 60', 0xa ;exit syscall 識別子
 len4 equ $ - msg4
