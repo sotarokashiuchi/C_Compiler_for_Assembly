@@ -9,11 +9,12 @@
 | OS         | Ubuntu 22.04.2 LTS                           |
 | アセンブラ | NASM version 2.16.01 compiled on Jun 18 2023 |
 | リンカ     | GNU ld (GNU Binutils for Ubuntu) 2.38        |
+|            | cc (Ubuntu 11.3.0-1ubuntu1~22.04.1) 11.3.0   |
 
 ```shell
 nasm -f elf64 -g -o main.o -l main.lts main.s
-ld -m elf_x86_64 -o main.out main.o
-./main.out > temp.s
+cc -static -o ccompiler main.o
+./compiler "option" > temp.s
 nasm -f elf64 -g -o temp.o -l temp.lts temp.s
 ld -m elf_x86_64 -o temp.out temp.o
 ./temp.s
@@ -48,12 +49,19 @@ ld -m elf_x86_64 -o temp.out temp.o
   - [x] (2023/06/19)「書籍1:07:CPUの基本機能」
   - [x] (2023/06/22)「書籍1:08:CPU命令の使い方」
   - [x] (2023/06/18)「書籍1:09:アセンブラ(NASM)の使い方」
-  - [ ] 「書籍1:13:アセンブラによる制御構文と関数の記述例」(<---Now:2023/06/22)
+  - [ ] 「書籍1:13:アセンブラによる制御構文と関数の記述例」(<---Now:2023/06/24)
 - [ ] プログラムレビューをしやすいようにマニュアルを作成
 - [ ] 「compilerbook:1:整数1個をコンパイルする言語の作成」
-  - [ ] 出力:結果をシステムコールを通じて表示(<---Now:2023/06/22)
-  - [ ] システムコールの理解を深める
-  - [ ] 入力:データを取り込む 
+  - [x] (2023/06/21)出力:結果をシステムコールを通じて表示
+  - [x] (2023/06/24)システムコールの理解を深める
+    - [SystemV ABI AMD64](https://refspecs.linuxfoundation.org/elf/x86_64-abi-0.99.pdf)のP124「A.2 AMD64 Linux Kernel Conventions」にAMD64の場合の規約がある
+    - 関数呼び出し規約と少し違う点に注意
+  - [x] (2023/06/24)入力:データを取り込む
+    - ldコマンドとccコマンドの関係と違い
+      - ccコマンドはldコマンドを内部的に呼び出している
+      - ldコマンドはデフォルトで__startシンボルをエントリーポイントとしている。またスタートアップルーチンなどを付け加えることがない。そのため、スタートアップルーチンを含む処理をアセンブリ言語で書く必要がある
+      - ccコマンドはスタートアップルーチンがmainを呼び出すようにリンクする。mainを関数として呼び出すため、mainでretを行うことができる。またスタートアップルーチンがコマンドラインから引数を受け取り、mainの第一引数、第二引数に渡している。
+  - [ ] 入力データを出力 (<---Now:2023/06/24)
   - [ ] test.shの導入
   - [ ] Makefileの作成
   - [ ] gitの設定
