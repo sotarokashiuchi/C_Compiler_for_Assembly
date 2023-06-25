@@ -35,61 +35,12 @@ main:
   ; 1文字入力した文字を取得
   mov rax, qword[rbp-8]
   mov bl, byte [rax]
+  and  bl, 0B0000_1111
 
-  cmp bl, 0x30
-  je .strtoint_0
-  cmp bl, 0x31
-  je .strtoint_1
-  cmp bl, 0x32
-  je .strtoint_2
-  cmp bl, 0x33
-  je .strtoint_3
-  cmp bl, 0x34
-  je .strtoint_4
-  cmp bl, 0x35
-  je .strtoint_5
-  cmp bl, 0x36
-  je .strtoint_6
-  cmp bl, 0x37
-  je .strtoint_7
-  cmp bl, 0x38
-  je .strtoint_8
-  cmp bl, 0x39
-  je .strtoint_9
+  add bl, 0x01
 
-.strtoint_0:
-  mov rbx, 0
-  jmp .strtoint_E
-.strtoint_1:
-  mov rbx, 1
-  jmp .strtoint_E
-.strtoint_2:
-  mov rbx, 2
-  jmp .strtoint_E
-.strtoint_3:
-  mov rbx, 3
-  jmp .strtoint_E
-.strtoint_4:
-  mov rbx, 4
-  jmp .strtoint_E
-.strtoint_5:
-  mov rbx, 5
-  jmp .strtoint_E
-.strtoint_6:
-  mov rbx, 6
-  jmp .strtoint_E
-.strtoint_7:
-  mov rbx, 7
-  jmp .strtoint_E
-.strtoint_8:
-  mov rbx, 8
-  jmp .strtoint_E
-.strtoint_9:
-  mov rbx, 9
-  jmp .strtoint_E
-
-.strtoint_E:
-
+  or bl, 0B0011_0000
+  mov [rax], byte bl
 
   ; アセンブリコード生成
   print msg1
@@ -116,7 +67,7 @@ msg5 db 0x09,   'mov rdi, ',          0x0 ;引数1
 ; 入力された文字列埋め込み
 msg6 db 0xa, 0x09, 'syscall', 0xa, 0x0 ;exit呼び出し
 
-; TDD手法 入力した値をexitの終了ステータスとして入れたい
+; TDD手法 入力した値に1を足した値をexitの終了ステータスとして入れたい
 ; [SECTION .text]
 ; 	global _start
 ; _start:
