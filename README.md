@@ -14,10 +14,10 @@
 ```shell
 nasm -f elf64 -g -o main.o -l main.lts main.s
 cc -static -o ccompiler main.o
-./compiler "option" > temp.s
-nasm -f elf64 -g -o temp.o -l temp.lts temp.s
-ld -m elf_x86_64 -o temp.out temp.o
-./temp.s
+./compiler <option> > tmp.s
+nasm -f elf64 -g -o tmp.o -l tmp.lts tmp.s
+ld -m elf_x86_64 -o tmp tmp.o
+./tmp
 ```
 ## 計画
 - [x] (2023/06/18)環境の構築
@@ -59,7 +59,7 @@ ld -m elf_x86_64 -o temp.out temp.o
   - [x] (2023/06/24)入力:データを取り込む
     - ldコマンドとccコマンドの関係と違い
       - ccコマンドはldコマンドを内部的に呼び出している
-      - ldコマンドはデフォルトで__startシンボルをエントリーポイントとしている。またスタートアップルーチンなどを付け加えることがない。そのため、スタートアップルーチンを含む処理をアセンブリ言語で書く必要がある
+      - ldコマンドはデフォルトで__startシンボルをエントリーポイントとしている。またスタートアップルーチンなどを付け加えることがない。そのため、スタートアップルーチンを含む処理をアセンブリ言語で書く必要がある。OSなどを作成する時には有用。
       - ccコマンドはスタートアップルーチンがmainを呼び出すようにリンクする。mainを関数として呼び出すため、mainでretを行うことができる。またスタートアップルーチンがコマンドラインから引数を受け取り、mainの第一引数、第二引数に渡している。
   - [ ] 入力データを出力 (<---Now:2023/06/24)
   - [ ] test.shの導入
