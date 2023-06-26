@@ -33,14 +33,23 @@ main:
   push  qword [rbx]
 
   ; 1文字入力した文字を取得
-  mov rax, qword[rbp-8]
-  mov bl, byte [rax]
-  and  bl, 0B0000_1111
+  mov   r8, qword[rbp-8]
+  mov   rcx, 0x0
+  mov   rax, 0x0
+  mov   rbx, 0x0
 
-  add bl, 0x01
-
-  or bl, 0B0011_0000
-  mov [rax], byte bl
+.strtoint_loop:
+  cmp   byte [r8], 0x0
+  je    .strtoint_done
+  mov   bl, byte [r8]
+  and   bl, 0B0000_1111   ; 文字を数値に変換
+  inc   r8                ; r8++
+  inc   rcx               ; rcx++
+  ; rbxレジスタを桁数に合わせて乗算する
+  imul  rax, dword 0B1010
+  add   rax, rbx
+  jmp   .strtoint_loop
+.strtoint_done:
 
   ; アセンブリコード生成
   print msg1
@@ -67,7 +76,7 @@ msg5 db 0x09,   'mov rdi, ',          0x0 ;引数1
 ; 入力された文字列埋め込み
 msg6 db 0xa, 0x09, 'syscall', 0xa, 0x0 ;exit呼び出し
 
-; TDD手法 入力した値に1を足した値をexitの終了ステータスとして入れたい
+; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
 ; [SECTION .text]
 ; 	global _start
 ; _start:
