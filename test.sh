@@ -17,7 +17,8 @@ assert() {
 }
 
 # expected input
-assert "1" "0"
-assert "4" "3"
+assert "6" "5"
+assert "46" "45"
+assert "10" "9"
 
 echo OK

@@ -1,7 +1,7 @@
 ; rcxとraxの退避が必要
 %macro print 1
-  mov   rcx, 0x0
   mov   rax, %1
+  mov   rcx, 0x0
 
 %%print_loop:
   cmp   byte [rax], 0x0
@@ -30,9 +30,11 @@ main:
   mov   rax, rdi    ; 第一引数(argc)
   mov   rbx, rsi    ; 第二引数(argv[0])
   add   rbx, 0x8    ; 第二引数(argv[1])
-  push  qword [rbx]
+  mov   r8, qword[rbx]
+  mov   [rbp-8], r8
+  ; push  qword [rbx]
 
-  ; 1文字入力した文字を取得
+  ; 十進数の文字列から二進数の数値に変換
   mov   r8, qword[rbp-8]
   mov   rcx, 0x0
   mov   rax, 0x0
@@ -51,13 +53,32 @@ main:
   jmp   .strtoint_loop
 .strtoint_done:
 
+  ; 入力数値をインクリメント
+  inc   rax
+
+  ; 二進数の数値を十進数の文字列に変換
+  mov   rcx, msgchar1
+  add   rcx, 0x8
+  mov   [rcx], byte 0x00
+  mov   r8,  qword 0B1010
+.inttostr_loop:
+  cmp   rax, 0x0
+  je    .inttostr_done
+  mov   rdx, 0x0          ; 乗算の結果(剰余)を格納するレジスタを初期化(idiv前に必ず初期化する必要あり?)
+  idiv  r8                ; RAX/0x1010 = RAX余りRDX (余りが十進数の下の桁になる)
+  or    rdx, 0B0011_0000  ; 数値を文字に変換
+  dec   rcx               ; rcx--
+  mov   [rcx], dl         ; 文字列になるように格納
+  jmp   .inttostr_loop
+.inttostr_done:
+
   ; アセンブリコード生成
   print msg1
   print msg2
   print msg3
   print msg4
   print msg5
-  print qword[rbp-8]
+  print msgchar1
   print msg6
 
   mov rsp, rbp
@@ -68,13 +89,14 @@ main:
   syscall
 
 [SECTION .data]
-msg1 db       '[SECTION .text]', 0xa, 0x0  ; 「0xa」は\n
+msg1 db       '[SECTION .text]', 0xa, 0x0
 msg2 db 0x09,   'global _start', 0xa, 0x0
 msg3 db         '_start:', 0xa,       0x0
 msg4 db 0x09,   'mov rax, 0x3c', 0xa, 0x0 ;exit syscall 識別子
 msg5 db 0x09,   'mov rdi, ',          0x0 ;引数1
-; 入力された文字列埋め込み
+; 入力された文字列を数値に変換し、インクリメントした値を再び文字列に戻し出力
 msg6 db 0xa, 0x09, 'syscall', 0xa, 0x0 ;exit呼び出し
+msgchar1 db '        '
 
 ; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
 ; [SECTION .text]
