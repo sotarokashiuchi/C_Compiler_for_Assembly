@@ -55,6 +55,7 @@ num:
 
 .strtoint_done:
   ; 終期設定
+  mov   rax, rdx
   pop   rbx
   mov   rsp, rbp
   pop   rbp
@@ -81,7 +82,6 @@ main:
   call  num
 
   ; 入力数値をインクリメント
-  mov   rax, rdx
   inc   rax
 
   ; 二進数の数値を十進数の文字列に変換
