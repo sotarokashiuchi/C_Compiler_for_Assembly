@@ -65,6 +65,7 @@ num:
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
 
 [SECTION .text]
+  extern printf
   global main       ;エントリーポイント
 	
 main:
@@ -99,6 +100,9 @@ main:
   mov   [rcx], dl         ; 文字列になるように格納
   jmp   .inttostr_loop
 .inttostr_done:
+  mov   rdi, msg7
+  mov   rax, 0
+  call  printf
 
   ; アセンブリコード生成
   print msg1
@@ -124,6 +128,7 @@ msg4 db 0x09,   'mov rax, 0x3c', 0xa, 0x0 ;exit syscall 識別子
 msg5 db 0x09,   'mov rdi, ',          0x0 ;引数1
 ; 入力された文字列を数値に変換し、インクリメントした値を再び文字列に戻し出力
 msg6 db 0xa, 0x09, 'syscall', 0xa, 0x0 ;exit呼び出し
+msg7 db 'Hello World', 0xa, 0x0
 msgchar1 db '        '
 
 ; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
