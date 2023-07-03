@@ -80,6 +80,7 @@ ld -m elf_x86_64 -o tmp tmp.o
     - 文字を格納するためのメモリ領域をどのように確保するかが課題
 - [ ] 「compilerbook:2:加減算の実現」 (<---Now:2023/06/25)
   - [x] (2023/07/03)printf(libc)の呼び出し
+    - [参考](https://www.mourtada.se/calling-printf-from-the-c-standard-library-in-assembly/)
   - [ ] 「+」記号と「-」記号の認識
   - [ ] 加減算の実現
 
