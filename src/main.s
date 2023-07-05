@@ -18,7 +18,7 @@
 %endmacro
 
 ; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
-; int(RAX) num(char* strar_point(RDI))
+; int(RAX) num(char* strat_point(RDI))
 num:
   ; 初期設定
   push  rbp
@@ -80,21 +80,7 @@ main:
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
 
-  ; テスト実行
-  mov   rdi, qword[rbp-8]
-  call  num
-
-  ; 入力数値をインクリメント
-  inc   rax
-  mov   qword[rbp-16], rax
-
-
-  ; mov   rdi, 4
-  ; mov   rsi, msg1
-  ; mov   rax, 0
-  ; call  fprintf
-
-  ; アセンブリコード生成
+  ; アセンブリコード前半出力
   mov   rdi, msg1
   mov   rax, 0
   call  printf
@@ -104,14 +90,57 @@ main:
   mov   rdi, msg3
   mov   rax, 0
   call  printf
+
+  ; 1つ目の項を取得
+  mov   rdi, qword[rbp-8]
+  call  num
+  mov   qword[rbp-8], rdi
   mov   rdi, msg4
+  mov   rsi, rax
   mov   rax, 0
   call  printf
+
+.main_loop:
+  mov   rdi, qword[rbp-8]
+  cmp   byte[rdi], 0x0
+  je    .main_done
+  
+  ; if + かどうか
+  cmp   byte[rdi], 0B0010_1011
+  je    .add_if
+
+  ; if - かどうか
+  cmp   byte[rdi], 0B0010_1101
+  je    .sub_if
+
+.add_if:
+  inc   rdi
+  call  num
+  mov   qword[rbp-8], rdi
   mov   rdi, msg5
-  mov   rsi, qword[rbp-16]
+  mov   rsi, rax
   mov   rax, 0
   call  printf
+  jmp   .main_loop
+
+.sub_if:
+  inc   rdi
+  call  num
+  mov   qword[rbp-8], rdi
   mov   rdi, msg6
+  mov   rsi, rax
+  mov   rax, 0
+  call  printf
+  jmp   .main_loop
+
+.main_done:
+  mov   rdi, msg7
+  mov   rax, 0
+  call  printf
+  mov   rdi, msg8
+  mov   rax, 0
+  call  printf
+  mov   rdi, msg9
   mov   rax, 0
   call  printf
 
@@ -126,14 +155,22 @@ main:
 msg1 db       '[SECTION .text]',  0xa, 0x0
 msg2 db 0x09,   'global _start',  0xa, 0x0
 msg3 db       '_start:',          0xa, 0x0
-msg4 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
-msg5 db 0x09,   'mov rdi, %d',    0xa, 0x0 ;引数1
-msg6 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
+msg4 db 0x09,   'mov rax, %d',  0xa, 0x0
+msg5 db 0x09,   'add rax, %d',  0xa, 0x0 ;exit syscall 識別子
+msg6 db 0x09,   'sub rax, %d',  0xa, 0x0 ;exit syscall 識別子
+
+msg7 db 0x09,   'mov rdi, rax',    0xa, 0x0 ;引数1
+msg8 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
+msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
 
 ; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
 ; [SECTION .text]
 ; 	global _start
 ; _start:
-; 	mov rax, 0x3c ;exit
-; 	mov rdi, 			;終了ステータスに入力した値を入れたい
+;   mov rax, 5
+;   add rax, 20
+;   sub rax, 5
+;   add rax, 3
+; 	mov rdi, rax	;終了ステータスに入力した値を入れたい
+;   mov rax, 0x3c
 ; 	syscall
