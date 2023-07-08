@@ -85,9 +85,25 @@ ld -m elf_x86_64 -o tmp tmp.o
     - [参考](https://www.mourtada.se/calling-printf-from-the-c-standard-library-in-assembly/)
   - [x] (2023/07/05)「+」記号と「-」記号の認識
   - [x] (2023/07/05)加減算の実現
-  - [ ] (保留)バグ:出力をリダイレクトしてtmp.sファイルに書き込むことができない
+  - [x] バグ:出力をリダイレクトしてtmp.sファイルに書き込むことができない
+    - printfで出力させており、printfのバッファに溜まっている文字列が出力されていなかった
+    - printfは改行でフラッシュされるわけではないみたい
+    - fflush関数を使用して解決
 - [ ] VSCode live share環境構築
-- [ ] gdbデバッガー拡張
+- [x] (2023/07/08)gdbデバッガー拡張
+  - [x] (2023/07/08)[GDB dashboard](https://github.com/cyrus-and/gdb-dashboard)
+    - GDB dashboardとはGDBデバッガーの複雑なコマンドを簡潔なコマンドにまとめたり、便利な機能をデフォルトでセットしてくれる
+    - デバッグ情報があるバイナリに使用する
+  - [x] (2023/07/08)[GDB peda](https://github.com/longld/peda)
+    - GDB pedaはとはGDBデバッガーの複雑なコマンドを簡潔なコマンドにまとめたり、便利な機能をデフォルトでセットしてくれる
+    - デバッグ情報がないバイナリに使用する
+  - dashboardとpedaの使い分けと設定方法
+    - 「dashboard」と「peda」と「自作.gdbinit」はどちらも.gdbinitを使用するので競合する
+    - そのため「dashboard」と「peda」が別のコマンドで起動するようにする
+      - `alias peda='gdb -nx -ix=~/.gdbinit_peda'`をbashrcなどに記述する
+      - dashboardが「gdbコマンド」で起動
+      - pedaが「pedaコマンド」で起動
+    - 自作.gdbinitは「dashboard」と「peda」の両方のファイルに記述しておくか`-x`オプションで複数のcommand fileを読み込むようにする
 - [ ] 「compilerbook:3：トークナイザを導入」
   - [ ] ヒープ領域の確保方法を学ぶ(malloc)
   - [ ] 構造体を定義
