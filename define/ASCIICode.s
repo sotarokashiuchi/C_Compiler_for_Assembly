@@ -1,4 +1,37 @@
 ; ASCII Code
+%define ASCII_NULL 0x00
+; %define ASCII_SPACE 0x01
+; %define ASCII_SPACE 0x02
+; %define ASCII_SPACE 0x03
+; %define ASCII_SPACE 0x04
+; %define ASCII_SPACE 0x05
+; %define ASCII_SPACE 0x06
+; %define ASCII_SPACE 0x07
+; %define ASCII_SPACE 0x08
+; %define ASCII_SPACE 0x09
+; %define ASCII_SPACE 0x0a
+; %define ASCII_SPACE 0x0b
+; %define ASCII_SPACE 0x0c
+; %define ASCII_SPACE 0x0d
+; %define ASCII_SPACE 0x0e
+; %define ASCII_SPACE 0x0f
+; %define ASCII_SPACE 0x10
+; %define ASCII_SPACE 0x11
+; %define ASCII_SPACE 0x12
+; %define ASCII_SPACE 0x13
+; %define ASCII_SPACE 0x14
+; %define ASCII_SPACE 0x15
+; %define ASCII_SPACE 0x16
+; %define ASCII_SPACE 0x17
+; %define ASCII_SPACE 0x18
+; %define ASCII_SPACE 0x19
+; %define ASCII_SPACE 0x1a
+; %define ASCII_SPACE 0x1b
+; %define ASCII_SPACE 0x1c
+; %define ASCII_SPACE 0x1d
+; %define ASCII_SPACE 0x1e
+; %define ASCII_SPACE 0x1f
+%define ASCII_SPACE 0x20
 ; %define ASCII_! 0x21
 ; %define ASCII_" 0x22
 ; %define ASCII_# 0x23

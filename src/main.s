@@ -107,25 +107,109 @@ main:
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
 
+  ; +----------------+
+  ; | Token Kind     |1byte
+  ; | padding        |2byte
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; +----------------+
+  ; | pointer        |9byte
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; |                |
+  ; +----------------+
+  ; トークナイズ
+  mov   r8, charspace
+  mov   r9, qword[rbp-8]
+.tokenize_loop:
+  mov   al, byte[r9]
+  ; トークナイズ終了条件
+  cmp   al, ASCII_NULL
+  je    .tokenize_done
 
-  mov   rdi, 0xc
-  call new_heap_memory
-  mov   rsi, rax
+  ; トークンが空白
+  cmp   al, ASCII_SPACE
+  jz    .tokenize_space
 
-  ; 確保したヒープ領域に文字列を書き込み
-  mov   [rsi+0], byte ASCII_H
-  mov   [rsi+1], byte ASCII_e
-  mov   [rsi+2], byte ASCII_l
-  mov   [rsi+3], byte ASCII_l
-  mov   [rsi+4], byte ASCII_o
-  mov   [rsi+5], byte ASCII_W
-  mov   [rsi+6], byte ASCII_o
-  mov   [rsi+7], byte ASCII_r
-  mov   [rsi+8], byte ASCII_l
-  mov   [rsi+9], byte ASCII_d
-  mov   [rsi+10], byte 0xa
-  mov   [rsi+11], byte 0x0
-  print rsi
+  ; トークンが記号の場合
+  cmp   al, ASCII_PLUS
+  jz    .tokenize_reserved
+  cmp   al, ASCII_MINUS
+  jz    .tokenize_reserved
+
+  ; トークンが数字の場合
+  cmp   al, ASCII_0
+  jz    .tokenize_number
+  cmp   al, ASCII_1
+  jz    .tokenize_number
+  cmp   al, ASCII_2
+  jz    .tokenize_number
+  cmp   al, ASCII_3
+  jz    .tokenize_number
+  cmp   al, ASCII_4
+  jz    .tokenize_number
+  cmp   al, ASCII_5
+  jz    .tokenize_number
+  cmp   al, ASCII_6
+  jz    .tokenize_number
+  cmp   al, ASCII_7
+  jz    .tokenize_number
+  cmp   al, ASCII_8
+  jz    .tokenize_number
+  cmp   al, ASCII_9
+  jz    .tokenize_number
+
+  jmp   .tokenize_error
+
+.tokenize_space:
+  inc   r9
+  jmp   .tokenize_loop
+
+.tokenize_reserved:
+  ; 一文字分のヒープ領域確保
+  mov   rdi, 0x2
+  call  new_heap_memory
+  mov   dl, byte [r9]
+  inc   r9
+  mov   [rax], byte dl
+  mov   [rax+1], byte 0x0
+
+  ; トーク列追加
+  mov   [r8], byte TK_RESERVED
+  mov   [r8+0x8], rax
+  add   r8, 0x10
+
+  jmp   .tokenize_loop
+
+.tokenize_number:
+  mov   rdi, r9
+  call  num
+  mov   rbx, rax
+  mov   r9, rdi
+
+  ; int分(4byte)のヒープ領域確保
+  mov   rdi, 0x4
+  call  new_heap_memory
+  mov   [rax], ebx
+
+  mov   [r8], byte TK_NUM
+  mov   [r8+0x8], rax
+  add   r8, 0x10
+
+  jmp   .tokenize_loop
+
+.tokenize_error:
+  jmp   .exit
+
+.tokenize_done:
 
   ; アセンブリコード前半出力
   mov   rdi, msg1
@@ -198,6 +282,7 @@ main:
   mov rsp, rbp
   pop rbp
 
+.exit:
   mov rax, 60 ;exit syscall 識別子
   mov rdi, 0  ;引数1:終了ステータス
   syscall
@@ -216,9 +301,6 @@ msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
 msg10 db 0xa, 'a', 0x0
 
 charspace times 200 db 0x0
-
-; TDD手法1 brkシステムコールを用いて、ヒープ領域を確保し、文字列を格納し、表示させるプログラムの作成
-  ; Hello Wold
 
 ; TDD手法2 空白が含まれていても、加減算を行えるプログラムの作成
 ; [SECTION .text]

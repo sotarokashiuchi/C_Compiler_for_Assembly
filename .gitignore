@@ -1,4 +1,6 @@
 *.o
 *.lts
 tmp*
+.*
+peda-session*.txt
 ccompiler
