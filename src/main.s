@@ -1,9 +1,9 @@
 %include "define/ASCIICode.s"
 
-; ; Token Kind
-; %define TK_RESERVED 0
-; %define TK_NUM      1
-; %define TK_EOF      2
+; Token Kind
+%define TK_EOF      0
+%define TK_RESERVED 1
+%define TK_NUM      2
 
 ; rcxとraxの退避が必要
 %macro print 1
@@ -68,13 +68,31 @@ num:
   pop   rbp
   ret
 
+; ヒープ領域の確保
+; void* new_heap_memory(size)
+new_heap_memory:
+  mov   rsi, rdi
+  
+  ; 現在のbreak位置確認
+  mov   rax, 0x0c   ; brk
+  mov   rdi, 0
+  syscall
+  mov   rdx, rax
+
+  ; break位置拡張
+  mov   rdi, rax
+  mov   rax, 0xc
+  add   rdi, rsi
+  syscall
+
+  mov   rax, rdx
+  ret
+
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
 
 [SECTION .text]
   extern printf
-  extern sprintf
-  extern fprintf
   extern fflush
   global main       ;エントリーポイント
 	
@@ -89,18 +107,10 @@ main:
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
 
-  ; ヒープ領域の確保
-  ; 現在のbreak位置確認
-  mov   rax, 0x0c   ; brk
-  mov   rdi, 0
-  syscall
 
-  ; break位置拡張
+  mov   rdi, 0xc
+  call new_heap_memory
   mov   rsi, rax
-  mov   rdi, rax
-  mov   rax, 0xc
-  add   rdi, 0x1000
-  syscall
 
   ; 確保したヒープ領域に文字列を書き込み
   mov   [rsi+0], byte ASCII_H
@@ -205,7 +215,7 @@ msg8 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
 msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
 msg10 db 0xa, 'a', 0x0
 
-charspace db '                                   '
+charspace times 200 db 0x0
 
 ; TDD手法1 brkシステムコールを用いて、ヒープ領域を確保し、文字列を格納し、表示させるプログラムの作成
   ; Hello Wold
