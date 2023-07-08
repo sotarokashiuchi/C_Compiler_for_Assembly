@@ -1,8 +1,11 @@
 %include "define/ASCIICode.s"
 
+%define True        1
+%define False       0
+
 ; Token Kind
 %define TK_EOF      0
-%define TK_RESERVED 1
+%define TK_SIGN     1
 %define TK_NUM      2
 
 ; rcxとraxの退避が必要
@@ -88,6 +91,38 @@ new_heap_memory:
   mov   rax, rdx
   ret
 
+; int expect_number(Token_t *token)
+expect_number:
+  mov   rax, 0
+  cmp   byte [rdi], TK_NUM
+  jnz   .notnumber
+  mov   rdx, qword[rdi+8]
+  mov   eax, dword[rdx]
+  add   rdi, 0x10
+  ret
+
+.notnumber:
+  jmp   exit
+
+; bool expect_sign(Token_t *token, char sign)
+expect_sign:
+  cmp   byte[rdi], TK_SIGN
+  jnz   .not_expect_sign
+  
+  mov   rdx, qword[rdi+8]
+  mov   al, byte[rdx]
+  mov   rcx, rsi
+  cmp   al, cl
+  jnz   .not_expect_sign
+
+  add   rdi, 0x10
+  mov   rax, True
+  ret
+
+.not_expect_sign:
+  mov   rax, False
+  ret
+
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
 
@@ -109,7 +144,7 @@ main:
 
   ; +----------------+
   ; | Token Kind     |1byte
-  ; | padding        |2byte
+  ; | padding        |7byte
   ; |                |
   ; |                |
   ; |                |
@@ -117,7 +152,7 @@ main:
   ; |                |
   ; |                |
   ; +----------------+
-  ; | pointer        |9byte
+  ; | pointer        |8byte
   ; |                |
   ; |                |
   ; |                |
@@ -141,9 +176,9 @@ main:
 
   ; トークンが記号の場合
   cmp   al, ASCII_PLUS
-  jz    .tokenize_reserved
+  jz    .tokenize_sign
   cmp   al, ASCII_MINUS
-  jz    .tokenize_reserved
+  jz    .tokenize_sign
 
   ; トークンが数字の場合
   cmp   al, ASCII_0
@@ -173,7 +208,7 @@ main:
   inc   r9
   jmp   .tokenize_loop
 
-.tokenize_reserved:
+.tokenize_sign:
   ; 一文字分のヒープ領域確保
   mov   rdi, 0x2
   call  new_heap_memory
@@ -183,7 +218,7 @@ main:
   mov   [rax+1], byte 0x0
 
   ; トーク列追加
-  mov   [r8], byte TK_RESERVED
+  mov   [r8], byte TK_SIGN
   mov   [r8+0x8], rax
   add   r8, 0x10
 
@@ -207,7 +242,7 @@ main:
   jmp   .tokenize_loop
 
 .tokenize_error:
-  jmp   .exit
+  jmp   exit
 
 .tokenize_done:
 
@@ -222,32 +257,38 @@ main:
   mov   rax, 0
   call  printf
 
+  mov   r12, charspace
   ; 1つ目の項を取得
-  mov   rdi, qword[rbp-8]
-  call  num
-  mov   qword[rbp-8], rdi
+  mov   rdi, r12
+  call  expect_number
+  mov   r12, rdi
   mov   rdi, msg4
   mov   rsi, rax
   mov   rax, 0
   call  printf
 
 .main_loop:
-  mov   rdi, qword[rbp-8]
-  cmp   byte[rdi], 0x0
-  je    .main_done
+  mov   rdi, r12
+  cmp   byte[rdi], TK_EOF
+  jz    .main_done
   
   ; if + かどうか
-  cmp   byte[rdi], ASCII_PLUS
-  je    .add_if
+  mov   rsi, ASCII_PLUS
+  call  expect_sign
+  cmp   rax, True
+  jz    .add_if
 
   ; if - かどうか
-  cmp   byte[rdi], ASCII_MINUS
-  je    .sub_if
+  mov   rsi, ASCII_MINUS
+  call  expect_sign
+  cmp   rax, True
+  jz    .sub_if
+
+  jmp   exit
 
 .add_if:
-  inc   rdi
-  call  num
-  mov   qword[rbp-8], rdi
+  call  expect_number
+  mov   r12, rdi
   mov   rdi, msg5
   mov   rsi, rax
   mov   rax, 0
@@ -255,9 +296,8 @@ main:
   jmp   .main_loop
 
 .sub_if:
-  inc   rdi
-  call  num
-  mov   qword[rbp-8], rdi
+  call  expect_number
+  mov   r12, rdi
   mov   rdi, msg6
   mov   rsi, rax
   mov   rax, 0
@@ -282,7 +322,7 @@ main:
   mov rsp, rbp
   pop rbp
 
-.exit:
+exit:
   mov rax, 60 ;exit syscall 識別子
   mov rdi, 0  ;引数1:終了ステータス
   syscall
