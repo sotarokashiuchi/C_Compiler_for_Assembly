@@ -141,3 +141,4 @@
 引数
 - INTEGERクラス RAX:RDX funx(RDI, RSI, RDX, RCX, R8, R9)
 - SSEクラス xmm0:xmm1(xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7)
+- 可変長引数の場合,raxレジスタに引数の数を入れる必要がある?

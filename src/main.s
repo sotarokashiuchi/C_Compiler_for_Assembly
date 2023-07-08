@@ -1,3 +1,12 @@
+; ASCII Code
+%define ASCII_PLUS  0B0010_1011
+%define ASCII_MINUS 0B0010_1101
+
+; ; Token Kind
+; %define TK_RESERVED 0
+; %define TK_NUM      1
+; %define TK_EOF      2
+
 ; rcxとraxの退避が必要
 %macro print 1
   mov   rax, %1
@@ -66,7 +75,9 @@ num:
 
 [SECTION .text]
   extern printf
+  extern sprintf
   extern fprintf
+  extern fflush
   global main       ;エントリーポイント
 	
 main:
@@ -79,6 +90,22 @@ main:
   add   rbx, 0x8    ; 第二引数(argv[1])
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
+
+  ; sprintfで実装してみる
+  ; mov   rdi, charspace
+  ; mov   rsi, msg4
+  ; mov   rdx, 0x3
+  ; mov   rax, 0
+  ; call  sprintf
+  ; print charspace
+
+  ; fprintfで実装してみる
+  ; mov   rdi, 0x1
+  ; mov   rsi, msg1
+  ; mov   rax, 0
+  ; call  fprintf
+
+  ; brk
 
   ; アセンブリコード前半出力
   mov   rdi, msg1
@@ -106,11 +133,11 @@ main:
   je    .main_done
   
   ; if + かどうか
-  cmp   byte[rdi], 0B0010_1011
+  cmp   byte[rdi], ASCII_PLUS
   je    .add_if
 
   ; if - かどうか
-  cmp   byte[rdi], 0B0010_1101
+  cmp   byte[rdi], ASCII_MINUS
   je    .sub_if
 
 .add_if:
@@ -134,6 +161,7 @@ main:
   jmp   .main_loop
 
 .main_done:
+  ; アセンブリコード後半出力
   mov   rdi, msg7
   mov   rax, 0
   call  printf
@@ -144,6 +172,9 @@ main:
   mov   rax, 0
   call  printf
 
+  mov   rdi, 0
+  call  fflush
+  
   mov rsp, rbp
   pop rbp
 
@@ -162,6 +193,9 @@ msg6 db 0x09,   'sub rax, %d',  0xa, 0x0 ;exit syscall 識別子
 msg7 db 0x09,   'mov rdi, rax',    0xa, 0x0 ;引数1
 msg8 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
 msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
+msg10 db 0xa, 'a', 0x0
+
+charspace db '                                   '
 
 ; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
 ; [SECTION .text]
