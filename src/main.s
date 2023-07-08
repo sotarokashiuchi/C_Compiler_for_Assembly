@@ -1,6 +1,4 @@
-; ASCII Code
-%define ASCII_PLUS  0B0010_1011
-%define ASCII_MINUS 0B0010_1101
+%include "define/ASCIICode.s"
 
 ; ; Token Kind
 ; %define TK_RESERVED 0
@@ -91,21 +89,33 @@ main:
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
 
-  ; sprintfで実装してみる
-  ; mov   rdi, charspace
-  ; mov   rsi, msg4
-  ; mov   rdx, 0x3
-  ; mov   rax, 0
-  ; call  sprintf
-  ; print charspace
+  ; ヒープ領域の確保
+  ; 現在のbreak位置確認
+  mov   rax, 0x0c   ; brk
+  mov   rdi, 0
+  syscall
 
-  ; fprintfで実装してみる
-  ; mov   rdi, 0x1
-  ; mov   rsi, msg1
-  ; mov   rax, 0
-  ; call  fprintf
+  ; break位置拡張
+  mov   rsi, rax
+  mov   rdi, rax
+  mov   rax, 0xc
+  add   rdi, 0x1000
+  syscall
 
-  ; brk
+  ; 確保したヒープ領域に文字列を書き込み
+  mov   [rsi+0], byte ASCII_H
+  mov   [rsi+1], byte ASCII_e
+  mov   [rsi+2], byte ASCII_l
+  mov   [rsi+3], byte ASCII_l
+  mov   [rsi+4], byte ASCII_o
+  mov   [rsi+5], byte ASCII_W
+  mov   [rsi+6], byte ASCII_o
+  mov   [rsi+7], byte ASCII_r
+  mov   [rsi+8], byte ASCII_l
+  mov   [rsi+9], byte ASCII_d
+  mov   [rsi+10], byte 0xa
+  mov   [rsi+11], byte 0x0
+  print rsi
 
   ; アセンブリコード前半出力
   mov   rdi, msg1
@@ -174,7 +184,7 @@ main:
 
   mov   rdi, 0
   call  fflush
-  
+
   mov rsp, rbp
   pop rbp
 
@@ -197,7 +207,10 @@ msg10 db 0xa, 'a', 0x0
 
 charspace db '                                   '
 
-; TDD手法 複数桁の入力した値に1を足した値をexitの終了ステータスとして入れたい
+; TDD手法1 brkシステムコールを用いて、ヒープ領域を確保し、文字列を格納し、表示させるプログラムの作成
+  ; Hello Wold
+
+; TDD手法2 空白が含まれていても、加減算を行えるプログラムの作成
 ; [SECTION .text]
 ; 	global _start
 ; _start:
