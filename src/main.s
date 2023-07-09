@@ -102,6 +102,9 @@ expect_number:
   ret
 
 .notnumber:
+  mov   rdi, errormsg2
+  mov   rax, 0
+  call  printf
   jmp   exit
 
 ; bool expect_sign(Token_t *token, char sign)
@@ -122,6 +125,7 @@ expect_sign:
 .not_expect_sign:
   mov   rax, False
   ret
+
 
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
@@ -242,6 +246,9 @@ main:
   jmp   .tokenize_loop
 
 .tokenize_error:
+  mov   rdi, errormsg1
+  mov   rax, 0
+  call  printf
   jmp   exit
 
 .tokenize_done:
@@ -284,7 +291,7 @@ main:
   cmp   rax, True
   jz    .sub_if
 
-  jmp   exit
+  jmp   .main_error
 
 .add_if:
   call  expect_number
@@ -304,6 +311,12 @@ main:
   call  printf
   jmp   .main_loop
 
+.main_error:
+  mov   rdi, errormsg3
+  mov   rax, 0
+  call  printf
+  jmp   exit
+
 .main_done:
   ; アセンブリコード後半出力
   mov   rdi, msg7
@@ -316,16 +329,15 @@ main:
   mov   rax, 0
   call  printf
 
+exit:
   mov   rdi, 0
   call  fflush
-
-  mov rsp, rbp
-  pop rbp
-
-exit:
   mov rax, 60 ;exit syscall 識別子
   mov rdi, 0  ;引数1:終了ステータス
   syscall
+
+  mov rsp, rbp
+  pop rbp
 
 [SECTION .data]
 msg1 db       '[SECTION .text]',  0xa, 0x0
@@ -338,7 +350,10 @@ msg6 db 0x09,   'sub rax, %d',  0xa, 0x0 ;exit syscall 識別子
 msg7 db 0x09,   'mov rdi, rax',    0xa, 0x0 ;引数1
 msg8 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
 msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
-msg10 db 0xa, 'a', 0x0
+
+errormsg1 db "Failed: Didn't tokenize",  0xa, 0x0
+errormsg2 db "Failed: This token isn't number",  0xa, 0x0
+errormsg3 db "Failed: Syntax error",  0xa, 0x0
 
 charspace times 200 db 0x0
 
