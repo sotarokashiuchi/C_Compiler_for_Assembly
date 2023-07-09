@@ -27,9 +27,8 @@
   syscall           ; write(fd, *buf, count)
 %endmacro
 
-; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
-; int(RAX) num(char* strat_point(RDI))
-num:
+; int(RAX) strtoint(char* strat_point(RDI))
+strtoint:
   ; 初期設定
   push  rbp
   mov   rbp, rsp
@@ -96,8 +95,9 @@ expect_number:
   mov   rax, 0
   cmp   byte [rdi], TK_NUM
   jnz   .notnumber
-  mov   rdx, qword[rdi+8]
-  mov   eax, dword[rdx]
+  mov   eax, [rdi+0x4]
+  ; mov   rdx, qword[rdi+8]
+  ; mov   eax, dword[rdx]
   add   rdi, 0x10
   ret
 
@@ -148,10 +148,10 @@ main:
 
   ; +----------------+
   ; | Token Kind     |1byte
-  ; | padding        |7byte
+  ; | padding        |3byte
   ; |                |
   ; |                |
-  ; |                |
+  ; | valuse         |4byte
   ; |                |
   ; |                |
   ; |                |
@@ -230,16 +230,12 @@ main:
 
 .tokenize_number:
   mov   rdi, r9
-  call  num
+  call  strtoint
   mov   rbx, rax
   mov   r9, rdi
 
-  ; int分(4byte)のヒープ領域確保
-  mov   rdi, 0x4
-  call  new_heap_memory
-  mov   [rax], ebx
-
   mov   [r8], byte TK_NUM
+  mov   [r8+0x4], ebx
   mov   [r8+0x8], rax
   add   r8, 0x10
 
@@ -357,7 +353,10 @@ errormsg3 db "Failed: Syntax error",  0xa, 0x0
 
 charspace times 200 db 0x0
 
-; TDD手法2 空白が含まれていても、加減算を行えるプログラムの作成
+; expr = num ("+" num | "-" num)*
+; num  = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
+
+; TDD手法2 構文木を生成し加減算を解く
 ; [SECTION .text]
 ; 	global _start
 ; _start:
