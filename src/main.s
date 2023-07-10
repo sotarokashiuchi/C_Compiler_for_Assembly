@@ -3,6 +3,26 @@
 %define True        1
 %define False       0
 
+; Token_t
+; +----------------+
+; | Token Kind     |1byte
+; | padding        |3byte
+; |                |
+; |                |
+; | valuse         |4byte
+; |                |
+; |                |
+; |                |
+; +----------------+
+; | pointer        |8byte
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; +----------------+
 ; Token Kind
 %define TK_EOF      0
 %define TK_SIGN     1
@@ -90,15 +110,15 @@ new_heap_memory:
   mov   rax, rdx
   ret
 
-; int expect_number(Token_t *token)
+; int expect_number(void)
 expect_number:
-  mov   rax, 0
-  cmp   byte [rdi], TK_NUM
+  mov   rbx, [now_token]
+  cmp   byte [rbx], TK_NUM
   jnz   .notnumber
-  mov   eax, [rdi+0x4]
-  ; mov   rdx, qword[rdi+8]
-  ; mov   eax, dword[rdx]
-  add   rdi, 0x10
+  mov   rax, 0
+  mov   eax, [rbx+0x4]
+  add   rbx, 0x10
+  mov   [now_token], rbx
   ret
 
 .notnumber:
@@ -107,25 +127,26 @@ expect_number:
   call  printf
   jmp   exit
 
-; bool expect_sign(Token_t *token, char sign)
+; bool expect_sign(char sign)
 expect_sign:
-  cmp   byte[rdi], TK_SIGN
+  mov   rbx, [now_token]
+  cmp   byte[rbx], TK_SIGN
   jnz   .not_expect_sign
   
-  mov   rdx, qword[rdi+8]
+  mov   rdx, qword[rbx+8]
   mov   al, byte[rdx]
-  mov   rcx, rsi
+  mov   rcx, rdi
   cmp   al, cl
   jnz   .not_expect_sign
 
-  add   rdi, 0x10
+  add   rbx, 0x10
+  mov   [now_token], rbx
   mov   rax, True
   ret
 
 .not_expect_sign:
   mov   rax, False
   ret
-
 
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
@@ -146,25 +167,6 @@ main:
   mov   r8, qword[rbx]
   mov   [rbp-8], r8
 
-  ; +----------------+
-  ; | Token Kind     |1byte
-  ; | padding        |3byte
-  ; |                |
-  ; |                |
-  ; | valuse         |4byte
-  ; |                |
-  ; |                |
-  ; |                |
-  ; +----------------+
-  ; | pointer        |8byte
-  ; |                |
-  ; |                |
-  ; |                |
-  ; |                |
-  ; |                |
-  ; |                |
-  ; |                |
-  ; +----------------+
   ; トークナイズ
   mov   r8, charspace
   mov   r9, qword[rbp-8]
@@ -260,58 +262,17 @@ main:
   mov   rax, 0
   call  printf
 
-  mov   r12, charspace
-  ; 1つ目の項を取得
-  mov   rdi, r12
+  ; 4 + 3の入力専用
+  mov   rax, charspace
+  mov   [now_token], rax
   call  expect_number
-  mov   r12, rdi
-  mov   rdi, msg4
-  mov   rsi, rax
-  mov   rax, 0
-  call  printf
-
-.main_loop:
-  mov   rdi, r12
-  cmp   byte[rdi], TK_EOF
-  jz    .main_done
   
-  ; if + かどうか
-  mov   rsi, ASCII_PLUS
+  mov   rdi, ASCII_PLUS
   call  expect_sign
-  cmp   rax, True
-  jz    .add_if
 
-  ; if - かどうか
-  mov   rsi, ASCII_MINUS
-  call  expect_sign
-  cmp   rax, True
-  jz    .sub_if
-
-  jmp   .main_error
-
-.add_if:
   call  expect_number
-  mov   r12, rdi
-  mov   rdi, msg5
-  mov   rsi, rax
-  mov   rax, 0
-  call  printf
-  jmp   .main_loop
 
-.sub_if:
-  call  expect_number
-  mov   r12, rdi
-  mov   rdi, msg6
-  mov   rsi, rax
-  mov   rax, 0
-  call  printf
-  jmp   .main_loop
-
-.main_error:
-  mov   rdi, errormsg3
-  mov   rax, 0
-  call  printf
-  jmp   exit
+  call  exit
 
 .main_done:
   ; アセンブリコード後半出力
@@ -352,6 +313,8 @@ errormsg2 db "Failed: This token isn't number",  0xa, 0x0
 errormsg3 db "Failed: Syntax error",  0xa, 0x0
 
 charspace times 200 db 0x0
+; global
+now_token dq qword 0x0
 
 ; expr = num ("+" num | "-" num)*
 ; num  = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
