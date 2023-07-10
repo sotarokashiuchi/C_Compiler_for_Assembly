@@ -95,37 +95,37 @@ strtoint:
   mov   rbx, 0x0
   mov   rdx, 0x0
 
-.strtoint_loop:
-  ; 上位4bitが 0B0011 かどうか
-  mov   al, byte[rdi]
-  and   al, 0B1111_0000
-  cmp   al, 0B0011_0000
-  jnz   .strtoint_done ; ZF==0
+  .strtoint_loop:
+    ; 上位4bitが 0B0011 かどうか
+    mov   al, byte[rdi]
+    and   al, 0B1111_0000
+    cmp   al, 0B0011_0000
+    jnz   .strtoint_done ; ZF==0
 
-  ; 下位4bitが 0B1001 以下かどうか
-  mov   al, byte[rdi]
-  and   al, 0B0000_1111
-  mov   bl, 0B0000_1010
-  div   bl
-  cmp   al, 0x0
-  jnz   .strtoint_done ; ZF==0
+    ; 下位4bitが 0B1001 以下かどうか
+    mov   al, byte[rdi]
+    and   al, 0B0000_1111
+    mov   bl, 0B0000_1010
+    div   bl
+    cmp   al, 0x0
+    jnz   .strtoint_done ; ZF==0
 
-  mov   rax, 0x0
-  mov   al, byte [rdi]
-  and   al, 0B0000_1111   ; 文字を数値に変換
-  inc   rdi               ; rdi++
-  ; rbxレジスタを桁数に合わせて乗算する
-  imul  rdx, dword 0B1010
-  add   rdx, rax
-  jmp   .strtoint_loop
+    mov   rax, 0x0
+    mov   al, byte [rdi]
+    and   al, 0B0000_1111   ; 文字を数値に変換
+    inc   rdi               ; rdi++
+    ; rbxレジスタを桁数に合わせて乗算する
+    imul  rdx, dword 0B1010
+    add   rdx, rax
+    jmp   .strtoint_loop
 
-.strtoint_done:
-  ; 終期設定
-  mov   rax, rdx
-  pop   rbx
-  mov   rsp, rbp
-  pop   rbp
-  ret
+  .strtoint_done:
+    ; 終期設定
+    mov   rax, rdx
+    pop   rbx
+    mov   rsp, rbp
+    pop   rbp
+    ret
 
 ; ヒープ領域の確保
 ; void* new_heap_memory(size)
@@ -158,11 +158,11 @@ expect_number:
   mov   [now_token], rbx
   ret
 
-.notnumber:
-  mov   rdi, errormsg2
-  mov   rax, 0
-  call  printf
-  jmp   exit
+  .notnumber:
+    mov   rdi, errormsg2
+    mov   rax, 0
+    call  printf
+    jmp   exit
 
 ; bool expect_sign(char sign)
 expect_sign:
@@ -181,9 +181,9 @@ expect_sign:
   mov   rax, True
   ret
 
-.not_expect_sign:
-  mov   rax, False
-  ret
+  .not_expect_sign:
+    mov   rax, False
+    ret
 
 ; *node_t func(int kind, int val, node_t *LeftNode, node_t *rightNode)
 new_node:
@@ -211,47 +211,6 @@ new_node:
   mov   rsp, rbp
   pop   rbp
   ret
-
-  push  rbp
-  mov   rbp, rsp
-  sub   rsp, 0x10 ;?
-  
-  call  num
-
-  mov   rdi, NK_NUM
-  mov   esi, eax
-  mov   rdx, 0x0
-  mov   rcx, 0x0
-  call  new_node
-  mov   [rbp-0x8], rax
-
-  .expr_loop:
-    ; if + かどうか
-    mov   rdi, ASCII_PLUS
-    call  expect_sign
-    cmp   rax, True
-    jz    .add_if
-
-    ; if - かどうか
-
-    ; else
-    jmp   .expr_done
-
-  .add_if:
-    call  num
-    mov   rdi, NK_ADD
-    mov   esi, eax
-    mov   rdx, [rbp-0x8]
-    mov   rcx, rax
-    call  new_node
-    mov   [rbp-0x8], rax
-    jmp   .expr_loop
-
-  .expr_done:
-    mov   rax, [rbp-0x8]
-    mov   rsp, rbp
-    pop   rbp
-    ret
 
 ; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
 ; int num(void)
@@ -281,97 +240,97 @@ main:
   ; トークナイズ
   mov   r8, charspace
   mov   r9, qword[rbp-8]
-.tokenize_loop:
-  mov   al, byte[r9]
-  ; トークナイズ終了条件
-  cmp   al, ASCII_NULL
-  je    .tokenize_done
+  .tokenize_loop:
+    mov   al, byte[r9]
+    ; トークナイズ終了条件
+    cmp   al, ASCII_NULL
+    je    .tokenize_done
 
-  ; トークンが空白
-  cmp   al, ASCII_SPACE
-  jz    .tokenize_space
+    ; トークンが空白
+    cmp   al, ASCII_SPACE
+    jz    .tokenize_space
 
-  ; トークンが記号の場合
-  cmp   al, ASCII_PLUS
-  jz    .tokenize_sign
-  cmp   al, ASCII_MINUS
-  jz    .tokenize_sign
+    ; トークンが記号の場合
+    cmp   al, ASCII_PLUS
+    jz    .tokenize_sign
+    cmp   al, ASCII_MINUS
+    jz    .tokenize_sign
 
-  ; トークンが数字の場合
-  cmp   al, ASCII_0
-  jz    .tokenize_number
-  cmp   al, ASCII_1
-  jz    .tokenize_number
-  cmp   al, ASCII_2
-  jz    .tokenize_number
-  cmp   al, ASCII_3
-  jz    .tokenize_number
-  cmp   al, ASCII_4
-  jz    .tokenize_number
-  cmp   al, ASCII_5
-  jz    .tokenize_number
-  cmp   al, ASCII_6
-  jz    .tokenize_number
-  cmp   al, ASCII_7
-  jz    .tokenize_number
-  cmp   al, ASCII_8
-  jz    .tokenize_number
-  cmp   al, ASCII_9
-  jz    .tokenize_number
+    ; トークンが数字の場合
+    cmp   al, ASCII_0
+    jz    .tokenize_number
+    cmp   al, ASCII_1
+    jz    .tokenize_number
+    cmp   al, ASCII_2
+    jz    .tokenize_number
+    cmp   al, ASCII_3
+    jz    .tokenize_number
+    cmp   al, ASCII_4
+    jz    .tokenize_number
+    cmp   al, ASCII_5
+    jz    .tokenize_number
+    cmp   al, ASCII_6
+    jz    .tokenize_number
+    cmp   al, ASCII_7
+    jz    .tokenize_number
+    cmp   al, ASCII_8
+    jz    .tokenize_number
+    cmp   al, ASCII_9
+    jz    .tokenize_number
 
-  jmp   .tokenize_error
+    jmp   .tokenize_error
 
-.tokenize_space:
-  inc   r9
-  jmp   .tokenize_loop
+  .tokenize_space:
+    inc   r9
+    jmp   .tokenize_loop
 
-.tokenize_sign:
-  ; 一文字分のヒープ領域確保
-  mov   rdi, 0x2
-  call  new_heap_memory
-  mov   dl, byte [r9]
-  inc   r9
-  mov   [rax], byte dl
-  mov   [rax+1], byte 0x0
+  .tokenize_sign:
+    ; 一文字分のヒープ領域確保
+    mov   rdi, 0x2
+    call  new_heap_memory
+    mov   dl, byte [r9]
+    inc   r9
+    mov   [rax], byte dl
+    mov   [rax+1], byte 0x0
 
-  ; トーク列追加
-  mov   [r8], byte TK_SIGN
-  mov   [r8+0x8], rax
-  add   r8, 0x10
+    ; トーク列追加
+    mov   [r8], byte TK_SIGN
+    mov   [r8+0x8], rax
+    add   r8, 0x10
 
-  jmp   .tokenize_loop
+    jmp   .tokenize_loop
 
-.tokenize_number:
-  mov   rdi, r9
-  call  strtoint
-  mov   rbx, rax
-  mov   r9, rdi
+  .tokenize_number:
+    mov   rdi, r9
+    call  strtoint
+    mov   rbx, rax
+    mov   r9, rdi
 
-  mov   [r8], byte TK_NUM
-  mov   [r8+0x4], ebx
-  mov   [r8+0x8], rax
-  add   r8, 0x10
+    mov   [r8], byte TK_NUM
+    mov   [r8+0x4], ebx
+    mov   [r8+0x8], rax
+    add   r8, 0x10
 
-  jmp   .tokenize_loop
+    jmp   .tokenize_loop
 
-.tokenize_error:
-  mov   rdi, errormsg1
-  mov   rax, 0
-  call  printf
-  jmp   exit
+  .tokenize_error:
+    mov   rdi, errormsg1
+    mov   rax, 0
+    call  printf
+    jmp   exit
 
-.tokenize_done:
+  .tokenize_done:
 
-  ; アセンブリコード前半出力
-  mov   rdi, msg1
-  mov   rax, 0
-  call  printf
-  mov   rdi, msg2
-  mov   rax, 0
-  call  printf
-  mov   rdi, msg3
-  mov   rax, 0
-  call  printf
+    ; アセンブリコード前半出力
+    mov   rdi, msg1
+    mov   rax, 0
+    call  printf
+    mov   rdi, msg2
+    mov   rax, 0
+    call  printf
+    mov   rdi, msg3
+    mov   rax, 0
+    call  printf
 
 .main_done:
   ; "5" などで実行し、exitが呼ばれる直前のraxのアドレスから木構造が適切に作られているか確認する
@@ -386,6 +345,11 @@ main:
   mov   rcx, 0x4ef032 ; またNK_NUMの場合は木は子を持たないが、今回はテストの為に持つことにする
   call  new_node
   call  exit
+
+; パーサ(抽象構文木生成)
+  ; mov   rax, charspace
+  ; mov   [now_token], rax
+  ; call  expr
 
   ; アセンブリコード後半出力
   mov   rdi, msg7
