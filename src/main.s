@@ -28,6 +28,43 @@
 %define TK_SIGN     1
 %define TK_NUM      2
 
+; Node_t
+; +----------------+
+; | Node Kind      |4byte
+; |                |
+; |                |
+; |                |
+; | int valuse     |4byte
+; |                |
+; |                |
+; |                |
+; +----------------+
+; | Node_t* Left   |8byte
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; +----------------+
+; | Node_t* Right  |8byte
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; |                |
+; +----------------+
+
+; Node Kind
+%define NK_ADD      1 ;ASCII_PLUS      +
+%define NK_SUB      2 ;ASCII_MINUS     -
+%define NK_MUL      3 ;ASCII_ASTERISK  *
+%define NK_DIV      4 ;ASCII_SLASH     /
+%define NK_NUM      5
+
 ; rcxとraxの退避が必要
 %macro print 1
   mov   rax, %1
@@ -148,6 +185,80 @@ expect_sign:
   mov   rax, False
   ret
 
+; *node_t func(int kind, int val, node_t *LeftNode, node_t *rightNode)
+new_node:
+  push  rbp
+  mov   rbp, rsp
+  sub   rsp, 0x18
+
+  mov   [rbp-0x4], edi
+  mov   [rbp-0x8], esi
+  mov   [rbp-0x10], rdx
+  mov   [rbp-0x18], rcx
+  
+  mov   rdi, 0x18
+  call  new_heap_memory
+  
+  mov   edi, [rbp-0x4]
+  mov   [rax+0x0], edi
+  mov   edi, [rbp-0x8]
+  mov   [rax+0x4], edi
+  mov   rdi, [rbp-0x10]
+  mov   [rax+0x8], rdi
+  mov   rdi, [rbp-0x18]
+  mov   [rax+0x10], rdi
+  
+  mov   rsp, rbp
+  pop   rbp
+  ret
+
+  push  rbp
+  mov   rbp, rsp
+  sub   rsp, 0x10 ;?
+  
+  call  num
+
+  mov   rdi, NK_NUM
+  mov   esi, eax
+  mov   rdx, 0x0
+  mov   rcx, 0x0
+  call  new_node
+  mov   [rbp-0x8], rax
+
+  .expr_loop:
+    ; if + かどうか
+    mov   rdi, ASCII_PLUS
+    call  expect_sign
+    cmp   rax, True
+    jz    .add_if
+
+    ; if - かどうか
+
+    ; else
+    jmp   .expr_done
+
+  .add_if:
+    call  num
+    mov   rdi, NK_ADD
+    mov   esi, eax
+    mov   rdx, [rbp-0x8]
+    mov   rcx, rax
+    call  new_node
+    mov   [rbp-0x8], rax
+    jmp   .expr_loop
+
+  .expr_done:
+    mov   rax, [rbp-0x8]
+    mov   rsp, rbp
+    pop   rbp
+    ret
+
+; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
+; int num(void)
+num:
+  call  expect_number
+  ret
+
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
 
@@ -262,19 +373,20 @@ main:
   mov   rax, 0
   call  printf
 
-  ; 4 + 3の入力専用
+.main_done:
+  ; "5" などで実行し、exitが呼ばれる直前のraxのアドレスから木構造が適切に作られているか確認する
   mov   rax, charspace
   mov   [now_token], rax
-  call  expect_number
-  
-  mov   rdi, ASCII_PLUS
-  call  expect_sign
 
-  call  expect_number
+  call  num
 
+  mov   rdi, NK_NUM
+  mov   esi, eax
+  mov   rdx, 0x4ef01a ; このアドレスは適当である
+  mov   rcx, 0x4ef032 ; またNK_NUMの場合は木は子を持たないが、今回はテストの為に持つことにする
+  call  new_node
   call  exit
 
-.main_done:
   ; アセンブリコード後半出力
   mov   rdi, msg7
   mov   rax, 0
