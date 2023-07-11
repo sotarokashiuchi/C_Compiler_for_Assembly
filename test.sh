@@ -17,8 +17,9 @@ assert() {
 }
 
 # expected input
-assert "4" "5+ 4- 5"
-assert "3" "3+ 5- 5"
-assert 41 " 12 + 34 - 5 "
+assert "9" "5+4"
+assert "6" "5+4 - 3"
+assert "12" "5 + 9+ 3- 5"
+assert "251" "3 - 8"
 
 echo OK

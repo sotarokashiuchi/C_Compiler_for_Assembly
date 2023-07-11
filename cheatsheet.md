@@ -142,3 +142,24 @@
 - INTEGERクラス RAX:RDX funx(RDI, RSI, RDX, RCX, R8, R9)
 - SSEクラス xmm0:xmm1(xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7)
 - 可変長引数の場合,raxレジスタに引数の数を入れる必要がある?
+
+# x64
+| 64:01 | 32:01 | 16:01 | 16:09 | 08:01 |
+| ----- | ----- | ----- | ----- | ----- |
+| RAX   | EAX   | AX    | AH    | AL    |
+| RBX   | EBX   | BX    | BH    | BL    |
+| RCX   | ECX   | CX    | CH    | CL    |
+| RDX   | EDX   | DX    | DH    | DL    |
+| RSP   | ESP   | SP    |       |       |
+| RBP   | EBP   | BP    |       |       |
+| RSI   | ESI   | SI    |       |       |
+| RIP   | EIP   | IP    |       |       |
+| RDI   | EDI   | DI    |       |       |
+| R8    | R8D   |       |       |       |
+| R9    | R9D   |       |       |       |
+| R10   | R10D  |       |       |       |
+| R11   | R11D  |       |       |       |
+| R12   | R12D  |       |       |       |
+| R13   | R13D  |       |       |       |
+| R14   | R14D  |       |       |       |
+| R15   | R15D  |       |       |       |

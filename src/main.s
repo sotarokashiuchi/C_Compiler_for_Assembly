@@ -193,7 +193,7 @@ tokenize:
   push  r12
   push  r13
   mov   rbp, rsp
-  sub   rsp, 0x8
+  sub   rsp, 0x10
 
   mov   r13, rdi
   mov   r12, rsi
@@ -288,7 +288,7 @@ tokenize:
 new_node:
   push  rbp
   mov   rbp, rsp
-  sub   rsp, 0x18
+  sub   rsp, 0x20
 
   mov   [rbp-0x4], edi
   mov   [rbp-0x8], esi
@@ -316,7 +316,7 @@ new_node:
 expr:
   push  rbp
   mov   rbp, rsp
-  sub   rsp, 0x10 ;?
+  sub   rsp, 0x10
   
   call  num
   mov   [rbp-0x8], rax
@@ -378,6 +378,90 @@ num:
   call  new_node
   ret
 
+; void gen(node_t *node)
+gen:
+  push  rbp
+  push  r12
+  mov   rbp, rsp
+  sub   rsp, 0x8
+
+  mov   r12, rdi
+
+  ; nodeが葉かどうか
+  cmp   dword [r12+0x0], NK_NUM
+  jz    .leaf_node
+
+  ; 再帰的に呼び出す
+  ; nodeの左を探索
+  mov   rdi, qword [r12+0x8]
+  call  gen
+  ; nodeの右を探索
+  mov   rdi, qword [r12+0x10]
+  call  gen
+  ; 戻ってくる
+  
+  mov   rdi, msg2
+  mov   rax, 0
+  call  printf
+  mov   rdi, msg3
+  mov   rax, 0
+  call  printf
+
+  mov   r8d, dword [r12+0x0]
+  cmp   r8d, NK_ADD
+  jz    .add_node
+  cmp   r8d, NK_SUB
+  jz    .sub_node
+  cmp   r8d, NK_MUL
+  jz    .mul_node
+  cmp   r8d, NK_DIV
+  jz    .div_node
+
+  .leaf_node:
+    mov   rdi, msg1
+    mov   esi, dword [r12+0x4]
+    mov   rax, 0
+    call  printf
+    jmp   .gen_done
+
+  .add_node:
+    mov   rdi, msg4
+    mov   rax, 0
+    call  printf
+    jmp   .break
+  .sub_node:
+    mov   rdi, msg5
+    mov   rax, 0
+    call  printf
+    jmp   .break
+  .mul_node:
+    mov   rdi, msg6
+    mov   rax, 0
+    call  printf
+    jmp   .break
+  .div_node:
+    mov   rdi, msg7
+    mov   rax, 0
+    call  printf
+    mov   rdi, msg8
+    mov   rax, 0
+    call  printf
+    jmp   .break
+
+  .break:
+    mov   rdi, msg9
+    mov   rax, 0
+    call  printf
+    jmp   .gen_done
+
+  .gen_done:
+    mov   rdi, 0
+    call  fflush
+    mov   rsp, rbp
+    pop   r12
+    pop   rbp
+    ret
+
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
 ; syscall呼び出し規約 RAX RAX(RDI, RSI, RDX, r10, r8, r9)
 
@@ -404,31 +488,35 @@ main:
   call  tokenize
 
   ; アセンブリコード前半出力
-  mov   rdi, msg1
+  mov   rdi, msg_start1
   mov   rax, 0
   call  printf
-  mov   rdi, msg2
+  mov   rdi, msg_start2
   mov   rax, 0
   call  printf
-  mov   rdi, msg3
+  mov   rdi, msg_start3
   mov   rax, 0
   call  printf
 
-.main_done:
 ; パーサ(抽象構文木生成)
   mov   rax, charspace
   mov   [now_token], rax
   call  expr
-  call  exit
+
+  ; コード生成
+  mov   rdi, rax
+  call  gen
 
   ; アセンブリコード後半出力
-  mov   rdi, msg7
+  mov   rdi, msg10
+  call  printf
+  mov   rdi, msg_end1
   mov   rax, 0
   call  printf
-  mov   rdi, msg8
+  mov   rdi, msg_end2
   mov   rax, 0
   call  printf
-  mov   rdi, msg9
+  mov   rdi, msg_end3
   mov   rax, 0
   call  printf
 
@@ -443,16 +531,23 @@ exit:
   pop rbp
 
 [SECTION .data]
-msg1 db       '[SECTION .text]',  0xa, 0x0
-msg2 db 0x09,   'global _start',  0xa, 0x0
-msg3 db       '_start:',          0xa, 0x0
-msg4 db 0x09,   'mov rax, %d',  0xa, 0x0
-msg5 db 0x09,   'add rax, %d',  0xa, 0x0 ;exit syscall 識別子
-msg6 db 0x09,   'sub rax, %d',  0xa, 0x0 ;exit syscall 識別子
+msg_start1  db       '[SECTION .text]',   0xa, 0x0
+msg_start2  db 0x09,   'global _start',   0xa, 0x0
+msg_start3  db       '_start:',           0xa, 0x0
+msg1        db 0x09,   'push %d',         0xa, 0x0
+msg2        db 0x09,   'pop rdi',         0xa, 0x0
+msg3        db 0x09,   'pop rax',         0xa, 0x0
+msg4        db 0x09,   'add rax, rdi',    0xa, 0x0
+msg5        db 0x09,   'sub rax, rdi',    0xa, 0x0
+msg6        db 0x09,   'imul rax, rdi',   0xa, 0x0
+msg7        db 0x09,   'cqo',             0xa, 0x0
+msg8        db 0x09,   'idiv rdi',        0xa, 0x0
+msg9        db 0x09,   'push rax',        0xa, 0x0
+msg10       db 0x09,   'pop rax',         0xa, 0x0
 
-msg7 db 0x09,   'mov rdi, rax',    0xa, 0x0 ;引数1
-msg8 db 0x09,   'mov rax, 0x3c',  0xa, 0x0 ;exit syscall 識別子
-msg9 db 0x09, 'syscall',          0xa, 0x0 ;exit呼び出し
+msg_end1    db 0x09,   'mov rdi, rax',    0xa, 0x0 ;引数1
+msg_end2    db 0x09,   'mov rax, 0x3c',   0xa, 0x0 ;exit syscall 識別子
+msg_end3    db 0x09, 'syscall',           0xa, 0x0 ;exit呼び出し
 
 errormsg1 db "Failed: Didn't tokenize",  0xa, 0x0
 errormsg2 db "Failed: This token isn't number",  0xa, 0x0
@@ -465,14 +560,30 @@ now_token dq qword 0x0
 ; expr = num ("+" num | "-" num)*
 ; num  = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
 
-; TDD手法2 構文木を生成し加減算を解く
+; TDD手法2 構文木を生成し加減算を解く ex)2+3+4+5
 ; [SECTION .text]
 ; 	global _start
 ; _start:
-;   mov rax, 5
-;   add rax, 20
-;   sub rax, 5
-;   add rax, 3
-; 	mov rdi, rax	;終了ステータスに入力した値を入れたい
-;   mov rax, 0x3c
-; 	syscall
+;   // 2*3を計算
+  ; push 2
+  ; push 3
+  ; pop rdi
+  ; pop rax
+  ; add rax, rdi
+  ; push rax
+
+  ; // 4*5を計算
+  ; push 4
+  ; push 5
+  ; pop rdi
+  ; pop rax
+  ; add rax, rdi
+  ; push rax
+
+  ; pop rdi
+  ; pop rax
+  ; add rax, rdi
+  ; push rax
+	; mov rdi, rax	;終了ステータスに入力した値を入れたい
+  ; mov rax, 0x3c
+	; syscall
