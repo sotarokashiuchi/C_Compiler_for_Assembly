@@ -185,6 +185,105 @@ expect_sign:
     mov   rax, False
     ret
 
+; トークナイズ関数
+; void tokenize(char *inputString, char *tokenBuf)
+tokenize:
+  push  rbp
+  push  rbx
+  push  r12
+  push  r13
+  mov   rbp, rsp
+  sub   rsp, 0x8
+
+  mov   r13, rdi
+  mov   r12, rsi
+  .tokenize_loop:
+    mov   al, byte[r13]
+    ; トークナイズ終了条件
+    cmp   al, ASCII_NULL
+    je    .tokenize_done
+
+    ; トークンが空白
+    cmp   al, ASCII_SPACE
+    jz    .tokenize_space
+
+    ; トークンが記号の場合
+    cmp   al, ASCII_PLUS
+    jz    .tokenize_sign
+    cmp   al, ASCII_MINUS
+    jz    .tokenize_sign
+
+    ; トークンが数字の場合
+    cmp   al, ASCII_0
+    jz    .tokenize_number
+    cmp   al, ASCII_1
+    jz    .tokenize_number
+    cmp   al, ASCII_2
+    jz    .tokenize_number
+    cmp   al, ASCII_3
+    jz    .tokenize_number
+    cmp   al, ASCII_4
+    jz    .tokenize_number
+    cmp   al, ASCII_5
+    jz    .tokenize_number
+    cmp   al, ASCII_6
+    jz    .tokenize_number
+    cmp   al, ASCII_7
+    jz    .tokenize_number
+    cmp   al, ASCII_8
+    jz    .tokenize_number
+    cmp   al, ASCII_9
+    jz    .tokenize_number
+
+    jmp   .tokenize_error
+
+  .tokenize_space:
+    inc   r13
+    jmp   .tokenize_loop
+
+  .tokenize_sign:
+    ; 一文字分のヒープ領域確保
+    mov   rdi, 0x2
+    call  new_heap_memory
+    mov   dl, byte [r13]
+    inc   r13
+    mov   [rax], byte dl
+    mov   [rax+1], byte 0x0
+
+    ; トーク列追加
+    mov   [r12], byte TK_SIGN
+    mov   [r12+0x8], rax
+    add   r12, 0x10
+
+    jmp   .tokenize_loop
+
+  .tokenize_number:
+    mov   rdi, r13
+    call  strtoint
+    mov   rbx, rax
+    mov   r13, rdi
+
+    mov   [r12], byte TK_NUM
+    mov   [r12+0x4], ebx
+    mov   [r12+0x8], rax
+    add   r12, 0x10
+
+    jmp   .tokenize_loop
+
+  .tokenize_error:
+    mov   rdi, errormsg1
+    mov   rax, 0
+    call  printf
+    jmp   exit
+
+  .tokenize_done:
+    mov   rsp, rbp
+    pop   r12
+    pop   r13
+    pop   rbx
+    pop   rbp
+    ret
+
 ; *node_t func(int kind, int val, node_t *LeftNode, node_t *rightNode)
 new_node:
   push  rbp
@@ -299,99 +398,21 @@ main:
   mov   [rbp-8], r8
 
   ; トークナイズ
-  mov   r8, charspace
-  mov   r9, qword[rbp-8]
-  .tokenize_loop:
-    mov   al, byte[r9]
-    ; トークナイズ終了条件
-    cmp   al, ASCII_NULL
-    je    .tokenize_done
+; void tokenize(char *inputString, char *tokenBuf)
+  mov   rdi, [rbp-8]
+  mov   rsi, charspace
+  call  tokenize
 
-    ; トークンが空白
-    cmp   al, ASCII_SPACE
-    jz    .tokenize_space
-
-    ; トークンが記号の場合
-    cmp   al, ASCII_PLUS
-    jz    .tokenize_sign
-    cmp   al, ASCII_MINUS
-    jz    .tokenize_sign
-
-    ; トークンが数字の場合
-    cmp   al, ASCII_0
-    jz    .tokenize_number
-    cmp   al, ASCII_1
-    jz    .tokenize_number
-    cmp   al, ASCII_2
-    jz    .tokenize_number
-    cmp   al, ASCII_3
-    jz    .tokenize_number
-    cmp   al, ASCII_4
-    jz    .tokenize_number
-    cmp   al, ASCII_5
-    jz    .tokenize_number
-    cmp   al, ASCII_6
-    jz    .tokenize_number
-    cmp   al, ASCII_7
-    jz    .tokenize_number
-    cmp   al, ASCII_8
-    jz    .tokenize_number
-    cmp   al, ASCII_9
-    jz    .tokenize_number
-
-    jmp   .tokenize_error
-
-  .tokenize_space:
-    inc   r9
-    jmp   .tokenize_loop
-
-  .tokenize_sign:
-    ; 一文字分のヒープ領域確保
-    mov   rdi, 0x2
-    call  new_heap_memory
-    mov   dl, byte [r9]
-    inc   r9
-    mov   [rax], byte dl
-    mov   [rax+1], byte 0x0
-
-    ; トーク列追加
-    mov   [r8], byte TK_SIGN
-    mov   [r8+0x8], rax
-    add   r8, 0x10
-
-    jmp   .tokenize_loop
-
-  .tokenize_number:
-    mov   rdi, r9
-    call  strtoint
-    mov   rbx, rax
-    mov   r9, rdi
-
-    mov   [r8], byte TK_NUM
-    mov   [r8+0x4], ebx
-    mov   [r8+0x8], rax
-    add   r8, 0x10
-
-    jmp   .tokenize_loop
-
-  .tokenize_error:
-    mov   rdi, errormsg1
-    mov   rax, 0
-    call  printf
-    jmp   exit
-
-  .tokenize_done:
-
-    ; アセンブリコード前半出力
-    mov   rdi, msg1
-    mov   rax, 0
-    call  printf
-    mov   rdi, msg2
-    mov   rax, 0
-    call  printf
-    mov   rdi, msg3
-    mov   rax, 0
-    call  printf
+  ; アセンブリコード前半出力
+  mov   rdi, msg1
+  mov   rax, 0
+  call  printf
+  mov   rdi, msg2
+  mov   rax, 0
+  call  printf
+  mov   rdi, msg3
+  mov   rax, 0
+  call  printf
 
 .main_done:
 ; パーサ(抽象構文木生成)
