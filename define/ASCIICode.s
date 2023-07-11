@@ -41,12 +41,12 @@
 ; %define ASCII_' 0x27
 ; %define ASCII_( 0x28
 ; %define ASCII_) 0x29
-; %define ASCII_* 0x2a
+%define ASCII_ASTERISK 0x2a
 %define ASCII_PLUS 0x2b
-; %define ASCII_, 0x2c
+%define ASCII_COMMA 0x2c
 %define ASCII_MINUS 0x2d
-; %define ASCII_. 0x2e
-; %define ASCII_/ 0x2f
+%define ASCII_PERIOD 0x2e
+%define ASCII_SLASH 0x2f
 %define ASCII_0 0x30
 %define ASCII_1 0x31
 %define ASCII_2 0x32

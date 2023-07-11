@@ -212,10 +212,71 @@ new_node:
   pop   rbp
   ret
 
+; expr = num ("+" num | "-" num)*
+; node_t* expr(void)
+expr:
+  push  rbp
+  mov   rbp, rsp
+  sub   rsp, 0x10 ;?
+  
+  call  num
+  mov   [rbp-0x8], rax
+
+  .expr_loop:
+    ; if + かどうか
+    mov   rdi, ASCII_PLUS
+    call  expect_sign     ;error Pointe new tokenを進めすぎている
+    cmp   rax, True
+    jz    .add_if
+
+    ; if - かどうか
+    mov   rdi, ASCII_MINUS
+    call  expect_sign
+    cmp   rax, True
+    jz    .sub_if
+
+    ; else
+    jmp   .expr_done
+
+  .add_if:
+    call  num
+    mov   [rbp-0x10], rax
+
+    mov   rdi, NK_ADD
+    mov   rsi, 0
+    mov   rdx, [rbp-0x8]
+    mov   rcx, [rbp-0x10]
+    call  new_node
+    mov   [rbp-0x8], rax
+    jmp   .expr_loop
+
+  .sub_if:
+    call  num
+    mov   [rbp-0x10], rax
+
+    mov   rdi, NK_SUB
+    mov   rsi, 0
+    mov   rdx, [rbp-0x8]
+    mov   rcx, [rbp-0x10]
+    call  new_node
+    mov   [rbp-0x8], rax
+    jmp   .expr_loop
+
+  .expr_done:
+    mov   rax, [rbp-0x8]
+    mov   rsp, rbp
+    pop   rbp
+    ret
+
 ; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
-; int num(void)
+; node_t* num(void)
 num:
   call  expect_number
+  mov   rdi, NK_NUM
+  mov   esi, eax
+  mov   rdx, 0x0
+  mov   rcx, 0x0
+  call  new_node
   ret
 
 ; 関数呼び出し規約(整数) RAX funx1(RDI, RSI, RDX, RCX, R8, R9, スタック, スタック, スタック, スタック)
@@ -333,23 +394,11 @@ main:
     call  printf
 
 .main_done:
-  ; "5" などで実行し、exitが呼ばれる直前のraxのアドレスから木構造が適切に作られているか確認する
+; パーサ(抽象構文木生成)
   mov   rax, charspace
   mov   [now_token], rax
-
-  call  num
-
-  mov   rdi, NK_NUM
-  mov   esi, eax
-  mov   rdx, 0x4ef01a ; このアドレスは適当である
-  mov   rcx, 0x4ef032 ; またNK_NUMの場合は木は子を持たないが、今回はテストの為に持つことにする
-  call  new_node
+  call  expr
   call  exit
-
-; パーサ(抽象構文木生成)
-  ; mov   rax, charspace
-  ; mov   [now_token], rax
-  ; call  expr
 
   ; アセンブリコード後半出力
   mov   rdi, msg7
