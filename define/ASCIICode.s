@@ -39,8 +39,8 @@
 ; %define ASCII_% 0x25
 ; %define ASCII_& 0x26
 ; %define ASCII_' 0x27
-; %define ASCII_( 0x28
-; %define ASCII_) 0x29
+%define ASCII_PARENTHERES_LEFT  0x28
+%define ASCII_PARENTHERES_RIGHT 0x29
 %define ASCII_ASTERISK 0x2a
 %define ASCII_PLUS 0x2b
 %define ASCII_COMMA 0x2c

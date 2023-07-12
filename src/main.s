@@ -216,6 +216,10 @@ tokenize:
     jz    .tokenize_sign
     cmp   al, ASCII_SLASH
     jz    .tokenize_sign
+    cmp   al, ASCII_PARENTHERES_LEFT
+    jz    .tokenize_sign
+    cmp   al, ASCII_PARENTHERES_RIGHT
+    jz    .tokenize_sign
 
     ; トークンが数字の場合
     cmp   al, ASCII_0
@@ -371,23 +375,23 @@ expr:
     pop   rbp
     ret
 
-; mul = num ("*" num | "/" num)*
+; mul = primary ("*" primary | "/" primary)*
 mul:
   push  rbp
   mov   rbp, rsp
   sub   rsp, 0x10
   
-  call  num
+  call  primary
   mov   [rbp-0x8], rax
 
   .mul_loop:
-    ; if + かどうか
+    ; if * かどうか
     mov   rdi, ASCII_ASTERISK
-    call  expect_sign     ;error Pointe new tokenを進めすぎている
+    call  expect_sign
     cmp   rax, True
     jz    .mul_if
 
-    ; if - かどうか
+    ; if / かどうか
     mov   rdi, ASCII_SLASH
     call  expect_sign
     cmp   rax, True
@@ -397,7 +401,7 @@ mul:
     jmp   .mul_done
 
   .mul_if:
-    call  num
+    call  primary
     mov   [rbp-0x10], rax
 
     mov   rdi, NK_MUL
@@ -409,7 +413,7 @@ mul:
     jmp   .mul_loop
 
   .div_if:
-    call  num
+    call  primary
     mov   [rbp-0x10], rax
 
     mov   rdi, NK_DIV
@@ -425,6 +429,42 @@ mul:
     mov   rsp, rbp
     pop   rbp
     ret
+
+; primary = num | "(" expr ")"
+primary:
+  push  rbp
+  mov   rbp, rsp
+  sub   rsp, 0x10
+
+  ; if ( かどうか
+  mov   rdi, ASCII_PARENTHERES_LEFT
+  call  expect_sign
+  cmp   rax, True
+  jz    .parentheres_if
+
+  ; else
+  call  num
+  jmp   .primary_done
+
+  .parentheres_if:
+    call  expr
+    mov   [rbp-0x8], rax
+    
+    mov   rdi, ASCII_PARENTHERES_RIGHT
+    call  expect_sign
+    cmp   rax, False
+    jz    .primary_error
+
+    mov   rax, [rbp-0x8]
+    jmp   .primary_done
+  
+  .primary_done:
+    mov   rsp, rbp
+    pop   rbp
+    ret
+    
+  .primary_error:
+    jmp   exit
 
 ; num = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
 ; node_t* num(void)
@@ -612,37 +652,7 @@ errormsg1 db "Failed: Didn't tokenize",  0xa, 0x0
 errormsg2 db "Failed: This token isn't number",  0xa, 0x0
 errormsg3 db "Failed: Syntax error",  0xa, 0x0
 
-charspace times 200 db 0x0
+; 100文字以内でなければバッファオーバフローが発生する
+charspace times 2400 db 0x0
 ; global
 now_token dq qword 0x0
-
-; expr = num ("+" num | "-" num)*
-; num  = ( 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )*
-
-; TDD手法2 構文木を生成し加減算を解く ex)2+3+4+5
-; [SECTION .text]
-; 	global _start
-; _start:
-;   // 2*3を計算
-  ; push 2
-  ; push 3
-  ; pop rdi
-  ; pop rax
-  ; add rax, rdi
-  ; push rax
-
-  ; // 4*5を計算
-  ; push 4
-  ; push 5
-  ; pop rdi
-  ; pop rax
-  ; add rax, rdi
-  ; push rax
-
-  ; pop rdi
-  ; pop rax
-  ; add rax, rdi
-  ; push rax
-	; mov rdi, rax	;終了ステータスに入力した値を入れたい
-  ; mov rax, 0x3c
-	; syscall
