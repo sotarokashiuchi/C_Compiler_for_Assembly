@@ -193,7 +193,7 @@ tokenize:
   push  r12
   push  r13
   mov   rbp, rsp
-  sub   rsp, 0x10
+  sub   rsp, 0x8
 
   mov   r13, rdi
   mov   r12, rsi
@@ -211,6 +211,10 @@ tokenize:
     cmp   al, ASCII_PLUS
     jz    .tokenize_sign
     cmp   al, ASCII_MINUS
+    jz    .tokenize_sign
+    cmp   al, ASCII_ASTERISK
+    jz    .tokenize_sign
+    cmp   al, ASCII_SLASH
     jz    .tokenize_sign
 
     ; トークンが数字の場合
@@ -311,14 +315,14 @@ new_node:
   pop   rbp
   ret
 
-; expr = num ("+" num | "-" num)*
+; expr = mul ("+" mul | "-" mul)*
 ; node_t* expr(void)
 expr:
   push  rbp
   mov   rbp, rsp
   sub   rsp, 0x10
   
-  call  num
+  call  mul
   mov   [rbp-0x8], rax
 
   .expr_loop:
@@ -338,7 +342,7 @@ expr:
     jmp   .expr_done
 
   .add_if:
-    call  num
+    call  mul
     mov   [rbp-0x10], rax
 
     mov   rdi, NK_ADD
@@ -350,7 +354,7 @@ expr:
     jmp   .expr_loop
 
   .sub_if:
-    call  num
+    call  mul
     mov   [rbp-0x10], rax
 
     mov   rdi, NK_SUB
@@ -362,6 +366,61 @@ expr:
     jmp   .expr_loop
 
   .expr_done:
+    mov   rax, [rbp-0x8]
+    mov   rsp, rbp
+    pop   rbp
+    ret
+
+; mul = num ("*" num | "/" num)*
+mul:
+  push  rbp
+  mov   rbp, rsp
+  sub   rsp, 0x10
+  
+  call  num
+  mov   [rbp-0x8], rax
+
+  .mul_loop:
+    ; if + かどうか
+    mov   rdi, ASCII_ASTERISK
+    call  expect_sign     ;error Pointe new tokenを進めすぎている
+    cmp   rax, True
+    jz    .mul_if
+
+    ; if - かどうか
+    mov   rdi, ASCII_SLASH
+    call  expect_sign
+    cmp   rax, True
+    jz    .div_if
+
+    ; else
+    jmp   .mul_done
+
+  .mul_if:
+    call  num
+    mov   [rbp-0x10], rax
+
+    mov   rdi, NK_MUL
+    mov   rsi, 0
+    mov   rdx, [rbp-0x8]
+    mov   rcx, [rbp-0x10]
+    call  new_node
+    mov   [rbp-0x8], rax
+    jmp   .mul_loop
+
+  .div_if:
+    call  num
+    mov   [rbp-0x10], rax
+
+    mov   rdi, NK_DIV
+    mov   rsi, 0
+    mov   rdx, [rbp-0x8]
+    mov   rcx, [rbp-0x10]
+    call  new_node
+    mov   [rbp-0x8], rax
+    jmp  .mul_loop
+
+  .mul_done:
     mov   rax, [rbp-0x8]
     mov   rsp, rbp
     pop   rbp
