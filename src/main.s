@@ -88,8 +88,9 @@
 strtoint:
   ; 初期設定
   push  rbp
-  mov   rbp, rsp
   push  rbx
+  mov   rbp, rsp
+  sub   rsp, 0x8
 
   mov   rax, 0x0
   mov   rbx, 0x0
@@ -122,8 +123,8 @@ strtoint:
   .strtoint_done:
     ; 終期設定
     mov   rax, rdx
-    pop   rbx
     mov   rsp, rbp
+    pop   rbx
     pop   rbp
     ret
 
@@ -149,13 +150,13 @@ new_heap_memory:
 
 ; int expect_number(void)
 expect_number:
-  mov   rbx, [now_token]
-  cmp   byte [rbx], TK_NUM
+  mov   rdx, [now_token]
+  cmp   byte [rdx], TK_NUM
   jnz   .notnumber
   mov   rax, 0
-  mov   eax, [rbx+0x4]
-  add   rbx, 0x10
-  mov   [now_token], rbx
+  mov   eax, [rdx+0x4]
+  add   rdx, 0x10
+  mov   [now_token], rdx
   ret
 
   .notnumber:
@@ -166,18 +167,18 @@ expect_number:
 
 ; bool expect_sign(char sign)
 expect_sign:
-  mov   rbx, [now_token]
-  cmp   byte[rbx], TK_SIGN
+  mov   r8, [now_token]
+  cmp   byte[r8], TK_SIGN
   jnz   .not_expect_sign
   
-  mov   rdx, qword[rbx+8]
+  mov   rdx, qword[r8+8]
   mov   al, byte[rdx]
   mov   rcx, rdi
   cmp   al, cl
   jnz   .not_expect_sign
 
-  add   rbx, 0x10
-  mov   [now_token], rbx
+  add   r8, 0x10
+  mov   [now_token], r8
   mov   rax, True
   ret
 
@@ -571,8 +572,9 @@ gen:
 	
 main:
   push  rbp
+  push  rbx
   mov   rbp, rsp
-  sub   rsp, 0x10
+  sub   rsp, 0x18
 
   mov   rax, rdi    ; 第一引数(argc)
   mov   rbx, rsi    ; 第二引数(argv[0])
