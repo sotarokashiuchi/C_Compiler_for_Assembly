@@ -133,6 +133,7 @@ ld -m elf_x86_64 -o tmp tmp.o
   - [x] (2023/08/07)SDM(SoftwareDevelopmentManual)の読み方を学ぶ
 - [ ] セキュリティ・キャンプ全国大会
   - [x] (2023/08/11)参加！！
+  - [x] (2023/08/11)[成果発表資料](sheet/SeccampResultsPresentation.pdf)作成＆発表
   - [ ] 参加記作成
   - [ ] 応募課題晒作成
 - [ ] Gitについて学ぶ
