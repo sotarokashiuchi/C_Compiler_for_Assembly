@@ -136,9 +136,10 @@ ld -m elf_x86_64 -o tmp tmp.o
   - [x] (2023/08/11)[成果発表資料](sheet/SeccampResultsPresentation.pdf)作成＆発表
   - [ ] 参加記作成
   - [ ] 応募課題晒作成
-- [ ] Gitについて学ぶ
+- [x] (2023/08/21)Gitについて学ぶ
   - [x] (2023/08/17)Gitの基本機能について学ぶ
-  - [ ] Gitが学べる資料を作成
+  - [x] (2023/08/21)Gitが学べる資料を作成
+    - [資料](https://github.com/sotarokashiuchi/JointDevelopmentEnviromentLesson)
 - [ ] GitHubについて学ぶ
   - [ ] GitHubの基本について学ぶ
   - [ ] GitHub Actionsについて学ぶ
